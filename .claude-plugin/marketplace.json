@@ -25,6 +25,16 @@
         "name": "Nichalas Barnes"
       },
       "homepage": "https://github.com/colorpulse6/claude-skills"
+    },
+    {
+      "name": "pr-respond",
+      "description": "Interactive walkthrough for addressing review comments on your own PRs. Fix, push back, defer, or skip each thread with batched implementation and auto-reply.",
+      "category": "development",
+      "source": "./plugins/pr-respond",
+      "author": {
+        "name": "Nichalas Barnes"
+      },
+      "homepage": "https://github.com/colorpulse6/claude-skills"
     }
   ]
 }

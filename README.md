@@ -25,6 +25,27 @@ AI-powered PR review that combines automated rule checking with interactive walk
 /pr-review https://github.com/owner/repo/pull/42  # Review by URL
 ```
 
+### `/pr-respond`
+
+Interactive walkthrough for addressing review comments on your own PRs. The counterpart to `/pr-review`.
+
+**Features:**
+- **Inbox mode** - `/pr-respond` with no args finds all your open PRs with unresolved review threads
+- **Single PR mode** - `/pr-respond 42` or `/pr-respond <url>`
+- **Per-thread actions** - Fix / Push back / Defer / Skip each unresolved comment
+- **Batched implementation** - one subagent handles all Fix items in a single pass, produces a coherent commit
+- **Auto-detect type check** - finds the right command (pnpm/yarn/npm with check-types or typecheck)
+- **Diff review before commit** - see the full diff before anything gets pushed
+- **Smart replies** - Fix replies include commit SHA with a link to the exact line; push-back replies use your reasoning verbatim
+- **Auto-resolve** - Fix and Push back threads are resolved, Defer and Skip stay open
+
+**Usage:**
+```bash
+/pr-respond           # Inbox mode - pick from your PRs with unresolved threads
+/pr-respond 42        # Respond to PR #42
+/pr-respond https://github.com/owner/repo/pull/42  # By URL
+```
+
 ### `/push`
 
 Quality-gated push pipeline that runs checks before pushing and creates PRs automatically.
@@ -52,8 +73,9 @@ Quality-gated push pipeline that runs checks before pushing and creates PRs auto
 # In Claude Code
 /plugin marketplace add colorpulse6/claude-skills
 
-# Install one or both plugins
+# Install the plugins you want
 /plugin install pr-review@colorpulse6-skills
+/plugin install pr-respond@colorpulse6-skills
 /plugin install push@colorpulse6-skills
 ```
 
@@ -113,6 +135,12 @@ claude-skills/
 │   │               ├── frontend-rules.md
 │   │               ├── contract-verification.md
 │   │               └── severity-definitions.md
+│   ├── pr-respond/
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json
+│   │   └── skills/
+│   │       └── pr-respond/
+│   │           └── SKILL.md
 │   └── push/
 │       ├── .claude-plugin/
 │       │   └── plugin.json

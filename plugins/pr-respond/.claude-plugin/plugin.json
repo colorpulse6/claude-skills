@@ -1,0 +1,7 @@
+{
+  "name": "pr-respond",
+  "description": "Interactive walkthrough for addressing review comments on your own PRs. Fix, push back, defer, or skip each thread with batched implementation and auto-reply.",
+  "author": {
+    "name": "Nichalas Barnes"
+  }
+}
