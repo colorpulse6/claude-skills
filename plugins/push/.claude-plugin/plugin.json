@@ -1,0 +1,7 @@
+{
+  "name": "push",
+  "description": "Quality-gated push pipeline with auto-detection of package manager, test commands, and project type",
+  "author": {
+    "name": "Nichalas Barnes"
+  }
+}

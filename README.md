@@ -46,28 +46,18 @@ Quality-gated push pipeline that runs checks before pushing and creates PRs auto
 
 ## Installation
 
-### Via Plugin Marketplace (recommended)
+### Via Plugin Marketplace
 
 ```bash
 # In Claude Code
 /plugin marketplace add colorpulse6/claude-skills
-/plugin install colorpulse6-skills
+
+# Install one or both plugins
+/plugin install pr-review@colorpulse6-skills
+/plugin install push@colorpulse6-skills
 ```
 
 Once installed, the skills are available in any project on your machine.
-
-### Manual Installation
-
-Clone this repo and symlink the skills directory:
-
-```bash
-git clone https://github.com/colorpulse6/claude-skills.git ~/claude-skills
-
-# For global use (available in all projects)
-mkdir -p ~/.claude/skills
-ln -s ~/claude-skills/skills/pr-review ~/.claude/skills/pr-review
-ln -s ~/claude-skills/skills/push ~/.claude/skills/push
-```
 
 ## How It Works
 
@@ -102,6 +92,38 @@ Universal rules (secrets, `any` types, error handling) always apply.
 ### Local Overrides
 
 If a project has its own `.claude/skills/pr-review/` or `.claude/skills/push/` directory, it takes precedence over the global skill. This lets you keep project-specific rules (e.g., custom terminology, domain-specific checks) separate from the generic skills.
+
+## Repo Structure
+
+```
+claude-skills/
+├── .claude-plugin/
+│   └── marketplace.json           # Marketplace manifest listing all plugins
+├── plugins/
+│   ├── pr-review/
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json        # Plugin manifest
+│   │   └── skills/
+│   │       └── pr-review/
+│   │           ├── SKILL.md
+│   │           ├── review-lens.md
+│   │           ├── output-contract.md
+│   │           └── references/
+│   │               ├── backend-rules.md
+│   │               ├── frontend-rules.md
+│   │               ├── contract-verification.md
+│   │               └── severity-definitions.md
+│   └── push/
+│       ├── .claude-plugin/
+│       │   └── plugin.json
+│       └── skills/
+│           └── push/
+│               ├── SKILL.md
+│               └── scripts/
+│                   ├── preflight.sh
+│                   └── secret-scan.sh
+└── README.md
+```
 
 ## Contributing
 

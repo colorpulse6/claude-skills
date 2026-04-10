@@ -1,0 +1,30 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "colorpulse6-skills",
+  "description": "Personal Claude Code skills for PR review and quality-gated push pipelines. Auto-detects project type (frontend/backend/full-stack) and package manager.",
+  "owner": {
+    "name": "Nichalas Barnes"
+  },
+  "plugins": [
+    {
+      "name": "pr-review",
+      "description": "AI-powered PR review with contract verification, frontend and backend rules, inbox mode, and incremental re-review. Auto-detects project type and applies relevant rules.",
+      "category": "development",
+      "source": "./plugins/pr-review",
+      "author": {
+        "name": "Nichalas Barnes"
+      },
+      "homepage": "https://github.com/colorpulse6/claude-skills"
+    },
+    {
+      "name": "push",
+      "description": "Quality-gated push pipeline. Auto-detects package manager and runs type check, lint, tests, build in parallel. Auto-fixes failures, creates PR, polls CI.",
+      "category": "development",
+      "source": "./plugins/push",
+      "author": {
+        "name": "Nichalas Barnes"
+      },
+      "homepage": "https://github.com/colorpulse6/claude-skills"
+    }
+  ]
+}

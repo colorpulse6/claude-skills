@@ -1,0 +1,7 @@
+{
+  "name": "pr-review",
+  "description": "AI-powered PR review with contract verification, frontend and backend rules, inbox mode, and incremental re-review",
+  "author": {
+    "name": "Nichalas Barnes"
+  }
+}
