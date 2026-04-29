@@ -11,15 +11,38 @@ allowed-tools: Bash, Read, Edit, Write, Glob, Grep, Agent
 
 # PR Review
 
-Interactive PR review for any GitHub repo. Runs a reviewer subagent with rules tailored to the project's stack, performs contract verification, and walks through findings interactively.
+PR review for any GitHub repo. Runs a reviewer subagent with rules tailored to the project's stack, performs contract verification, and posts findings to the PR via the GitHub reviews API.
 
-> **CRITICAL:** All review comments MUST be posted on the specific line where the issue exists. NEVER post code review feedback as general PR comments. Use the GitHub review API with line-specific comments.
+> **CRITICAL — POSTING IS MANDATORY, NOT OPTIONAL:**
+> - All review output MUST end with a successful `POST /repos/{owner}/{repo}/pulls/{number}/reviews` call (Step 10).
+> - All non-summary findings MUST be inline comments anchored to a `path` + `line` on the new-file side of the diff.
+> - NEVER stop after rendering the review in chat. NEVER post code feedback as a general issue comment. If you produced a finding and did not post it, that is a defect — submit before ending the turn.
+
+> **DEFAULT MODE — AUTONOMOUS:**
+> When invoked with a single PR reference (number, URL, or branch name) and no `walk` / `interactive` token, run **non-interactive**:
+> 1. Generate the review.
+> 2. Render the summary box (Step 8) for the user.
+> 3. Skip the per-finding walkthrough (Step 9).
+> 4. Submit immediately via the reviews API (Step 10) with **all findings accepted**.
+>
+> Only enter the interactive walkthrough when:
+> - The user appended `walk` / `interactive` / `--walk` to the invocation, OR
+> - You are in **inbox mode** (no PR argument), OR
+> - The user explicitly asks ("walk me through it", "review interactively", etc.)
 
 ---
 
 ## Step 1: Parse Input & Determine Mode
 
-Two modes: **single PR mode** (argument provided) or **inbox mode** (no argument).
+Two modes: **single PR mode** (argument provided) or **inbox mode** (no argument). Plus an optional **interactivity flag**.
+
+### Interactivity Flag
+
+If the args contain a token matching `walk`, `interactive`, `--walk`, or `--interactive` (case-insensitive), set `INTERACTIVE = true`. Otherwise `INTERACTIVE = false`.
+
+In single-PR mode, `INTERACTIVE = false` is the default (autonomous: render summary, post immediately). In inbox mode, `INTERACTIVE = true` is the default (since the user is choosing PRs to review).
+
+Strip the flag token from the args before parsing the PR reference.
 
 ### Single PR Mode
 
@@ -276,8 +299,6 @@ Description alignment: {STATUS} {NOTES}
 Strengths:
   - {STRENGTH_1}
   - {STRENGTH_2}
-
-Walk through findings? (y/n/skip)
 ```
 
 **Verdict emoji:**
@@ -285,11 +306,18 @@ Walk through findings? (y/n/skip)
 - `request-changes` → ❌
 - `comment` → 💬
 
-If `findings` is empty, skip the walkthrough and go directly to Step 10.
+After rendering the summary:
+
+- **If `INTERACTIVE = false`** (autonomous mode): proceed directly to Step 10 with **all findings accepted**. Do NOT ask "Walk through findings?". Do NOT stop. Submit and report.
+- **If `INTERACTIVE = true`** (walkthrough mode): append `Walk through findings? (y/n/skip)` and only proceed to Step 9 if the user answers `y`. If `n`/`skip`, accept all findings and proceed to Step 10.
+
+If `findings` is empty, skip Step 9 entirely and go directly to Step 10 (which will submit a clean review with `event: APPROVE`).
 
 ---
 
-## Step 9: Finding-by-Finding Walkthrough
+## Step 9: Finding-by-Finding Walkthrough (Interactive Mode Only)
+
+> **Skip this entire step when `INTERACTIVE = false`.** All findings are auto-accepted and submitted in Step 10. Step 9 only runs when the user explicitly opted into a walkthrough (via the `walk` / `interactive` flag, inbox-mode default, or in-conversation request).
 
 Present each finding one at a time, ordered by severity (critical → important → minor):
 
@@ -317,9 +345,14 @@ Track the accepted/rejected counts for Step 10.
 
 ---
 
-## Step 10: Submit Review
+## Step 10: Submit Review (MANDATORY TERMINAL STEP)
 
-Show a submission summary:
+> **You MUST execute the `gh api` POST call in this step before ending the turn.** If you reached this point and have not yet submitted, do so now. Do NOT print "review ready to submit" and stop. Do NOT summarize without posting. The review is not done until the API call returns 200 and the review URL is shown.
+
+### Behavior by mode
+
+- **Autonomous mode (`INTERACTIVE = false`):** all findings are auto-accepted. Skip the "Submit? (y/n)" prompt. Pick the verdict per the rules below and POST immediately.
+- **Walkthrough mode (`INTERACTIVE = true`):** show the submission summary and ask `Submit? (y/n)`. On `y`, POST. On `n`, store findings locally and report.
 
 ```
 Review ready to submit:
@@ -327,7 +360,6 @@ Review ready to submit:
   Rejected: {N_REJECTED}
 
 Recommended verdict: {VERDICT}
-Submit? (y/n)
 ```
 
 ### Verdict Adjustment Rules
@@ -340,23 +372,32 @@ Submit? (y/n)
 
 ### Submit via GitHub API
 
+Always use `--input file.json` with a JSON file (not inline `-f`) so newlines and code blocks in comment bodies are preserved.
+
 ```bash
 COMMIT_ID=$(gh pr view {NUMBER} --json headRefOid --jq '.headRefOid')
-cat <<EOF | gh api repos/{OWNER}/{REPO}/pulls/{NUMBER}/reviews --method POST --input -
+
+# Build payload as JSON (use a small Python or jq script for safety):
+cat > /tmp/pr_review_payload.json <<JSON
 {
   "commit_id": "$COMMIT_ID",
   "event": "{EVENT}",
-  "body": "{REVIEW_BODY}",
+  "body": {SUMMARY_BODY_AS_JSON_STRING},
   "comments": [
     {
       "path": "{FILE}",
       "line": {LINE},
       "side": "RIGHT",
-      "body": "{COMMENT_BODY_WITH_OPTIONAL_SUGGESTION_BLOCK}"
+      "body": {COMMENT_BODY_AS_JSON_STRING}
     }
   ]
 }
-EOF
+JSON
+
+gh api repos/{OWNER}/{REPO}/pulls/{NUMBER}/reviews \
+  --method POST \
+  --input /tmp/pr_review_payload.json \
+  --jq '{id: .id, state: .state, html_url: .html_url}'
 ```
 
 **Event mapping:**
@@ -364,11 +405,32 @@ EOF
 - `request-changes` → `REQUEST_CHANGES`
 - `comment` → `COMMENT`
 
-After successful submission, print:
+**Implementation tip — building the JSON payload safely:** comment bodies contain backticks, code fences, and newlines. Use Python (`json.dump`) or jq to build the payload — never shell-interpolate raw strings. Example (Python):
+
+```python
+import json
+payload = {
+    "commit_id": commit_id,
+    "event": event,
+    "body": review_body,
+    "comments": [
+        {"path": f["file"], "line": f["line"], "side": "RIGHT", "body": f["body"]}
+        for f in accepted_findings
+    ],
+}
+with open("/tmp/pr_review_payload.json", "w") as fp:
+    json.dump(payload, fp)
+```
+
+After successful submission, print exactly:
 
 ```
-✅ Review submitted: {PR_URL}
+✅ Review submitted: {PR_URL}#pullrequestreview-{REVIEW_ID}
+   Verdict: {VERDICT}
+   Inline comments: {N_ACCEPTED}
 ```
+
+**If the API call fails** (4xx / 5xx): show the error, save the payload to `/tmp/pr_review_payload.json` for inspection, and prompt the user. Do NOT silently swallow the failure.
 
 ---
 
@@ -391,10 +453,12 @@ Session Summary:
 
 ## Common Mistakes to Avoid
 
-- **Line numbers:** GitHub expects line numbers in the NEW file version (right side of diff), not hunk offsets. The subagent's output MUST use new-file line numbers.
+- **Stopping at Step 8:** the most common defect. Step 8 renders a summary; Step 10 is what actually posts. Never end the turn between them in autonomous mode.
+- **Posting findings as a general PR comment instead of inline review comments:** ALWAYS use the reviews API with a `comments` array. Each finding gets a `path` + `line` anchor.
+- **Line numbers from the wrong side of the diff:** GitHub expects line numbers in the NEW file version (right side of diff), not hunk offsets. The subagent's output MUST use new-file line numbers. When in doubt, fetch the file at the PR's head SHA via `gh api repos/.../contents/{path}?ref={head_sha}` and grep for the anchor.
 - **Rebased branches:** incremental diff may be empty after a force-push. Always fall back to full review when delta is empty.
 - **Draft PRs:** always confirm before reviewing drafts in inbox mode.
-- **General PR comments for code feedback:** ALWAYS use line-specific comments via the reviews API. Never post code feedback as a general PR comment.
 - **Reviewing generated files:** always filter them out via the Step 4 exclusion list.
 - **Own PRs:** skip silently in inbox mode; warn in single-PR mode before proceeding.
-- **CI failures duplicated as findings:** CI status goes in the header - only create a finding if the root cause is visible in the diff.
+- **CI failures duplicated as findings:** CI status goes in the header — only create a finding if the root cause is visible in the diff.
+- **Shell-interpolating comment bodies:** code review comments contain backticks, fences, and newlines. Use Python/jq + `--input file.json`, not `gh api -f body=...`.
