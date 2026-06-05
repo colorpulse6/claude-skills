@@ -65,6 +65,27 @@ Quality-gated push pipeline that runs checks before pushing and creates PRs auto
 /push  # Run the full pipeline
 ```
 
+### `/session-recap`
+
+A browser-viewable HTML timeline of your recent Claude Code sessions — a dark "flight recorder" view to use as a reference point for what you worked on.
+
+**Features:**
+- **Daily or weekly** - defaults to the last 7 days; pass a number or `daily`/`weekly`/`month`
+- **Timeline by day** - sessions grouped by day with project, branch, and time
+- **Reference points** - PRs (clickable), commits, files touched, and active time per session
+- **Key decisions** - one bounded LLM pass adds a summary + key decisions for notable sessions
+- **Active time, not wall-clock** - inter-message gaps over 30 min are dropped, so resumed sessions don't show absurd spans
+- **Resume from a card** - each session exposes its `claude --resume <id>` command (click to copy)
+- **Filter + search** - project chips (shift-click to solo), full-text search, PRs/commits-only toggle
+- **Self-contained** - one HTML file with data inlined; works offline
+
+**Usage:**
+```bash
+/session-recap          # Last 7 days
+/session-recap daily    # Last 24 hours
+/session-recap 30       # Last 30 days
+```
+
 ## Installation
 
 ### Via Plugin Marketplace
@@ -77,6 +98,7 @@ Quality-gated push pipeline that runs checks before pushing and creates PRs auto
 /plugin install pr-review@colorpulse6-skills
 /plugin install pr-respond@colorpulse6-skills
 /plugin install push@colorpulse6-skills
+/plugin install session-recap@colorpulse6-skills
 ```
 
 Once installed, the skills are available in any project on your machine.
@@ -141,15 +163,25 @@ claude-skills/
 │   │   └── skills/
 │   │       └── pr-respond/
 │   │           └── SKILL.md
-│   └── push/
+│   ├── push/
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json
+│   │   └── skills/
+│   │       └── push/
+│   │           ├── SKILL.md
+│   │           └── scripts/
+│   │               ├── preflight.sh
+│   │               └── secret-scan.sh
+│   └── session-recap/
 │       ├── .claude-plugin/
 │       │   └── plugin.json
 │       └── skills/
-│           └── push/
+│           └── session-recap/
 │               ├── SKILL.md
 │               └── scripts/
-│                   ├── preflight.sh
-│                   └── secret-scan.sh
+│                   ├── build_timeline.py
+│                   ├── build_digests.py
+│                   └── render_html.py
 └── README.md
 ```
 
