@@ -1,0 +1,7 @@
+{
+  "name": "session-recap",
+  "description": "Generates a browser-viewable HTML timeline of recent Claude Code sessions with key decisions, PRs, commits, and active time. Daily or weekly.",
+  "author": {
+    "name": "Nichalas Barnes"
+  }
+}

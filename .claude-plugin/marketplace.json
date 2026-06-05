@@ -35,6 +35,16 @@
         "name": "Nichalas Barnes"
       },
       "homepage": "https://github.com/colorpulse6/claude-skills"
+    },
+    {
+      "name": "session-recap",
+      "description": "Generates a browser-viewable HTML timeline of recent Claude Code sessions with key decisions, PRs, commits, files, and active time. Daily or weekly recaps from ~/.claude/projects transcripts.",
+      "category": "productivity",
+      "source": "./plugins/session-recap",
+      "author": {
+        "name": "Nichalas Barnes"
+      },
+      "homepage": "https://github.com/colorpulse6/claude-skills"
     }
   ]
 }
