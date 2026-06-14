@@ -39,11 +39,17 @@ generalist pass.
 ## Discipline
 
 - **Cite evidence, not vibes.** Every finding needs a `file:line` and a concrete
-  failure scenario. If you can't name how it breaks, it's not a finding — drop it
-  or mark it `Info`.
+  failure scenario (the input/state/outcome that triggers it). If you can't name
+  how it breaks, you're pattern-matching — drop it.
+- **Confidence-gate.** Attach a confidence 0–1 per finding; only report at ≥ 0.7.
+  Reserve Critical/High for findings where you can state the exact snippet, the
+  failure scenario, AND why existing guards don't catch it — if you can't produce
+  all three, demote or drop.
 - **Stay in your lane.** A perf issue you spot during a security pass goes in a
   one-line "out of lens" note at the bottom, not in your findings table.
-- **No findings is a valid result.** Say so plainly rather than inventing nits.
+- **No findings is a valid result.** Say so plainly rather than inventing nits —
+  manufactured findings and speculative "consider X" without a trigger are the
+  primary failure mode of LLM reviewers and erode trust in the real ones.
 
 ## Output format
 
@@ -52,11 +58,13 @@ Write exactly this to `output_dir/<lens>.md`:
 ```markdown
 ## <lens>
 
-| Finding | Severity | file:line | Failure mode | Fix |
-|---------|----------|-----------|--------------|-----|
-| ... | Critical/High/Medium/Low/Info | path:42 | ... | ... |
+| Finding | Severity | Confidence | file:line | Failure mode | Fix |
+|---------|----------|------------|-----------|--------------|-----|
+| ... | Critical/High/Medium/Low/Info | 0.0-1.0 | path:42 | ... | ... |
 
 _Out of lens (FYI):_ <optional one-liners, or "none">
 ```
 
 Severities, highest first: Critical, High, Medium, Low, Info.
+
+Return one status line: `<lens>: DONE|DONE_WITH_CONCERNS|BLOCKED — N findings (k critical/high)`.

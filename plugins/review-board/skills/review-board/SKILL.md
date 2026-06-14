@@ -108,6 +108,12 @@ Do **not** perform the lens analysis yourself — that defeats lens isolation.
   ```
   then read from that line. (Skip if Codex was unavailable.)
 - Read every `findings/<lens>.md`.
+- **Validation pass (kills false positives):** before surfacing any finding, verify
+  it yourself against the diff — distrust the report; a lens (and Codex) can over-flag.
+  Drop anything below confidence 0.7 or that you can't confirm from the code.
+- **Tag each surviving finding** by provenance: `[CONSENSUS]` (≥2 sources flagged
+  it independently — highest confidence, lead with these) / `[CROSS-VALIDATED]`
+  (a lens and Codex agree) / `[SINGLE-SOURCE]` (one source — verify before trusting).
 - Reconcile into `./.review-board-out/REVIEW-BOARD.md` per the contract below.
 
 ## Step 6: Report

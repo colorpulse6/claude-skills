@@ -139,6 +139,54 @@ A multi-lens, multi-model code review conductor — the "parent" that composes p
 /review-board my-branch # diff against the merge base
 ```
 
+### `/risk-gate`
+
+Triage-then-escalate: scores a diff cheaply, sends only the risky parts to deep review.
+
+**What it does:** a deterministic scorer (`risk_score.py`) rates each changed file on `risk = likelihood × blast-radius` (danger paths like auth/payments/migrations, churn, added control flow), buckets them Low/Medium/High, and escalates **only HIGH-risk files** to `review-board` (or `codex-second-opinion`). Spends the expensive model-diversity where it pays.
+
+**Usage:**
+```bash
+/risk-gate            # triage the working diff
+/risk-gate 42         # triage PR #42
+```
+
+### `/plan-harden`
+
+Adversarially review a design doc / spec / RFC **before** you build it — the cheapest place to fix a flaw.
+
+**What it does:** a context gate (what is it / who's affected / success), a **pre-mortem** ("it's 6 months out and this failed — why?"), and parallel `design-lens` agents (edge-cases, failure-handling, data-integrity, rollout-rollback, observability, scaling, security/STRIDE, dependencies). Reconciles into a five-part hardening report + an `APPROVED`/`REVISE` verdict. All findings are `[PLAN_RISK]` (prospective).
+
+**Usage:**
+```bash
+/plan-harden                 # newest design doc in docs/
+/plan-harden docs/rfc.md     # a specific doc
+```
+
+### `/dep-audit`
+
+Audit dependency-manifest / lockfile changes in two passes — cheap offline signal, then real tools.
+
+**What it does:** an offline pass (`manifest_scan.py`, zero network) flags semver deltas, range loosening, lockfile-integrity changes, new install scripts, and typosquats; then per-ecosystem `dep-scanner` agents run the real tools (`osv-scanner`, `npm audit`, `pip-audit`, `cargo audit`, `govulncheck`) plus maintainer-health checks, scoring each package on four axes (security / license / maintenance / breaking-change) with a Block/Warn/Monitor/Ignore verdict. Honest about offline limits.
+
+**Usage:**
+```bash
+/dep-audit            # audit the working diff's dependency changes
+/dep-audit 42         # audit PR #42
+```
+
+### `/test-gap`
+
+Find the most important **missing** tests in a change — ranked by risk, not coverage %.
+
+**What it does:** fans out `gap-finder` agents over the changed files; each traces codepaths (changed branches, error paths, boundaries) and ranks untested ones by `risk = impact × likelihood`, using the surviving-mutant test to catch covered-but-unasserted code. Optional coverage (`diff-cover`) and mutation (`Stryker`/`PIT`/`mutmut`/`cargo-mutants`) passes confirm gaps. Outputs prioritized tests-to-add (P0→P2) with proposed cases.
+
+**Usage:**
+```bash
+/test-gap             # find gaps in the working diff
+/test-gap 42          # PR #42
+```
+
 ## Installation
 
 ### Via Plugin Marketplace
@@ -155,6 +203,10 @@ A multi-lens, multi-model code review conductor — the "parent" that composes p
 /plugin install codex-second-opinion@colorpulse6-skills
 /plugin install skill-starter@colorpulse6-skills
 /plugin install review-board@colorpulse6-skills
+/plugin install risk-gate@colorpulse6-skills
+/plugin install plan-harden@colorpulse6-skills
+/plugin install dep-audit@colorpulse6-skills
+/plugin install test-gap@colorpulse6-skills
 ```
 
 Once installed, the skills are available in any project on your machine.
@@ -248,16 +300,41 @@ claude-skills/
 │   │           ├── SKILL.md
 │   │           └── scripts/
 │   │               └── collect.sh     # deterministic unit collector
-│   └── review-board/                  # multi-lens + multi-model review conductor
-│       ├── .claude-plugin/
-│       │   └── plugin.json
-│       ├── agents/
-│       │   └── review-lens.md         # parameterized single-lens reviewer (parallel)
-│       └── skills/
-│           └── review-board/
-│               ├── SKILL.md
-│               └── references/
-│                   └── lenses.md      # per-lens checklists (add a lens here)
+│   ├── review-board/                  # multi-lens + multi-model review conductor
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json
+│   │   ├── agents/
+│   │   │   └── review-lens.md         # parameterized single-lens reviewer (parallel)
+│   │   └── skills/
+│   │       └── review-board/
+│   │           ├── SKILL.md
+│   │           └── references/
+│   │               └── lenses.md      # per-lens checklists (add a lens here)
+│   ├── risk-gate/                     # triage a diff, escalate only risky parts
+│   │   ├── .claude-plugin/plugin.json
+│   │   └── skills/risk-gate/
+│   │       ├── SKILL.md
+│   │       ├── references/risk-signals.md
+│   │       └── scripts/risk_score.py  # deterministic per-file risk scorer
+│   ├── plan-harden/                   # adversarial pre-build design review
+│   │   ├── .claude-plugin/plugin.json
+│   │   ├── agents/design-lens.md      # parameterized adversarial lens (parallel)
+│   │   └── skills/plan-harden/
+│   │       ├── SKILL.md
+│   │       └── references/review-checklist.md
+│   ├── dep-audit/                     # dependency-change audit (offline + tools)
+│   │   ├── .claude-plugin/plugin.json
+│   │   ├── agents/dep-scanner.md      # per-ecosystem scanner (parallel)
+│   │   └── skills/dep-audit/
+│   │       ├── SKILL.md
+│   │       ├── references/dep-checklist.md
+│   │       └── scripts/manifest_scan.py  # offline diff scanner
+│   └── test-gap/                      # find the most important missing tests
+│       ├── .claude-plugin/plugin.json
+│       ├── agents/gap-finder.md       # per-shard gap finder (parallel)
+│       └── skills/test-gap/
+│           ├── SKILL.md
+│           └── references/test-gap-heuristics.md
 └── README.md
 ```
 

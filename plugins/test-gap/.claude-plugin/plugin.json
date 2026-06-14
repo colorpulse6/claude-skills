@@ -1,0 +1,7 @@
+{
+  "name": "test-gap",
+  "description": "Find the most important MISSING tests in a change. Fans out gap-finder agents over the changed files; each ranks untested code by risk = impact x likelihood (untested changed branches, error paths, boundaries, weak assertions), not raw coverage %. Optional coverage + mutation-testing passes confirm gaps. Produces a prioritized list of tests to add with proposed cases.",
+  "author": {
+    "name": "Nichalas Barnes"
+  }
+}

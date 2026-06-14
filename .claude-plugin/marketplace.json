@@ -75,6 +75,46 @@
         "name": "Nichalas Barnes"
       },
       "homepage": "https://github.com/colorpulse6/claude-skills"
+    },
+    {
+      "name": "risk-gate",
+      "description": "Triage a diff by change risk and escalate only the risky parts to deeper / separate-model review. A cheap deterministic pass scores each changed file (danger paths, churn, blast radius); only HIGH-risk files get the expensive review (review-board / codex-second-opinion).",
+      "category": "development",
+      "source": "./plugins/risk-gate",
+      "author": {
+        "name": "Nichalas Barnes"
+      },
+      "homepage": "https://github.com/colorpulse6/claude-skills"
+    },
+    {
+      "name": "plan-harden",
+      "description": "Adversarially review a design doc / spec / RFC before you build it. Runs a pre-mortem plus parallel design-review lenses (edge cases, failure handling, data integrity, rollout/rollback, observability, scaling, security/STRIDE), then reconciles into a prioritized hardening report with an APPROVED/REVISE verdict.",
+      "category": "development",
+      "source": "./plugins/plan-harden",
+      "author": {
+        "name": "Nichalas Barnes"
+      },
+      "homepage": "https://github.com/colorpulse6/claude-skills"
+    },
+    {
+      "name": "dep-audit",
+      "description": "Audit dependency-manifest / lockfile changes in a diff. A zero-network offline pass scores the diff (semver deltas, pin loosening, lockfile-integrity changes, install scripts, typosquatting); then per-ecosystem scanner agents run the real tools (osv-scanner, npm audit, pip-audit, cargo audit, govulncheck) and maintainer-health checks.",
+      "category": "development",
+      "source": "./plugins/dep-audit",
+      "author": {
+        "name": "Nichalas Barnes"
+      },
+      "homepage": "https://github.com/colorpulse6/claude-skills"
+    },
+    {
+      "name": "test-gap",
+      "description": "Find the most important MISSING tests in a change. Fans out gap-finder agents over the changed files; each ranks untested code by risk = impact x likelihood (untested branches, error paths, boundaries, weak assertions), not raw coverage %. Produces a prioritized list of tests to add with proposed cases.",
+      "category": "development",
+      "source": "./plugins/test-gap",
+      "author": {
+        "name": "Nichalas Barnes"
+      },
+      "homepage": "https://github.com/colorpulse6/claude-skills"
     }
   ]
 }
