@@ -65,6 +65,16 @@
         "name": "Nichalas Barnes"
       },
       "homepage": "https://github.com/colorpulse6/claude-skills"
+    },
+    {
+      "name": "review-board",
+      "description": "Multi-lens, multi-model code review conductor. Runs scoped Claude review agents in parallel (security, concurrency, performance, contract) while a separate model (Codex) reviews independently, then reconciles into one cross-model verdict. Pairs with codex-second-opinion.",
+      "category": "development",
+      "source": "./plugins/review-board",
+      "author": {
+        "name": "Nichalas Barnes"
+      },
+      "homepage": "https://github.com/colorpulse6/claude-skills"
     }
   ]
 }

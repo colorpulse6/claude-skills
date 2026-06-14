@@ -1,0 +1,7 @@
+{
+  "name": "review-board",
+  "description": "Multi-lens, multi-model code review conductor. Runs several scoped Claude review agents in parallel (security, concurrency, performance, contract) while a separate model (Codex) reviews independently, then reconciles everything into one cross-model verdict.",
+  "author": {
+    "name": "Nichalas Barnes"
+  }
+}

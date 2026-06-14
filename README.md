@@ -118,6 +118,27 @@ A **template plugin** you copy to start a new skill. It's a complete, working ex
 /skill-starter ./docs           # audit a directory
 ```
 
+### `/review-board`
+
+A multi-lens, multi-model code review conductor — the "parent" that composes parallel agents with `codex-second-opinion`.
+
+**What it does:** on a diff / PR / branch, it spawns several **scoped Claude review agents in parallel** (each hunting one failure-class) **while** a **separate model** (Codex) reviews independently, then reconciles everything into one ranked, cross-model verdict.
+
+**Two kinds of diversity at once:**
+- **Lens diversity** - `security`, `concurrency`, `performance`, `contract` lenses each tunnel-vision on one bug class, so nothing gets averaged away
+- **Model diversity** - Codex runs concurrently (its latency hides behind the lens work) and catches what same-model reasoning misses
+
+**Output:** `REVIEW-BOARD.md` with a verdict, a cross-model table, **convergence** (high-confidence), **net-new-from-Codex** (verify yourself), and sharpened disagreements. Falls back to Claude-only if the Codex CLI isn't installed.
+
+**Customize:** lenses live in `references/lenses.md` (one section each) and the agent is parameterized — add a lens without writing a new agent.
+
+**Usage:**
+```bash
+/review-board           # review the working diff
+/review-board 42        # review PR #42
+/review-board my-branch # diff against the merge base
+```
+
 ## Installation
 
 ### Via Plugin Marketplace
@@ -133,6 +154,7 @@ A **template plugin** you copy to start a new skill. It's a complete, working ex
 /plugin install session-recap@colorpulse6-skills
 /plugin install codex-second-opinion@colorpulse6-skills
 /plugin install skill-starter@colorpulse6-skills
+/plugin install review-board@colorpulse6-skills
 ```
 
 Once installed, the skills are available in any project on your machine.
@@ -216,16 +238,26 @@ claude-skills/
 │   │               ├── build_timeline.py
 │   │               ├── build_digests.py
 │   │               └── render_html.py
-│   └── skill-starter/                 # template plugin (orchestrator + parallel agents)
+│   ├── skill-starter/                 # template plugin (orchestrator + parallel agents)
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json
+│   │   ├── agents/
+│   │   │   └── starter-worker.md      # parallel specialist subagent
+│   │   └── skills/
+│   │       └── skill-starter/
+│   │           ├── SKILL.md
+│   │           └── scripts/
+│   │               └── collect.sh     # deterministic unit collector
+│   └── review-board/                  # multi-lens + multi-model review conductor
 │       ├── .claude-plugin/
 │       │   └── plugin.json
 │       ├── agents/
-│       │   └── starter-worker.md      # parallel specialist subagent
+│       │   └── review-lens.md         # parameterized single-lens reviewer (parallel)
 │       └── skills/
-│           └── skill-starter/
+│           └── review-board/
 │               ├── SKILL.md
-│               └── scripts/
-│                   └── collect.sh     # deterministic unit collector
+│               └── references/
+│                   └── lenses.md      # per-lens checklists (add a lens here)
 └── README.md
 ```
 
