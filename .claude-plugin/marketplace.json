@@ -115,6 +115,16 @@
         "name": "Nichalas Barnes"
       },
       "homepage": "https://github.com/colorpulse6/claude-skills"
+    },
+    {
+      "name": "create-skill",
+      "description": "Meta-skill for authoring new skills/plugins in this repo. Interviews for intent, picks the right shape (inline vs orchestrator + parallel agents), scaffolds the files, writes them against a distilled best-practices guide, self-reviews against an anti-pattern checklist, and registers the plugin.",
+      "category": "development",
+      "source": "./plugins/create-skill",
+      "author": {
+        "name": "Nichalas Barnes"
+      },
+      "homepage": "https://github.com/colorpulse6/claude-skills"
     }
   ]
 }

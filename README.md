@@ -187,6 +187,22 @@ Find the most important **missing** tests in a change — ranked by risk, not co
 /test-gap 42          # PR #42
 ```
 
+### `/create-skill`
+
+A **meta-skill** for authoring new skills/plugins in this repo the right way — it bakes in the research behind every other plugin here.
+
+**What it does:** interviews for intent + trigger phrases, picks the right shape (inline skill vs orchestrator + parallel agents), scaffolds the files (`scaffold.sh`), writes them against a distilled **authoring guide** (frontmatter, descriptions, progressive disclosure) and **patterns** reference (inline-vs-agents rubric, parameterized-agent pattern, confidence/severity/status-enum conventions), self-reviews against an **anti-pattern checklist**, and registers the plugin in the marketplace + README.
+
+**Two bundled references hold the substance:**
+- `authoring-guide.md` — frontmatter rules, the description discovery surface, progressive disclosure (<500-line SKILL.md, one-level refs, TOC over 100 lines), subagent scoping, and the anti-pattern checklist
+- `patterns.md` — when to fan out vs stay inline, the parameterized-agent pattern, scripts-for-determinism, and the shared quality conventions
+
+**Usage:**
+```bash
+/create-skill                       # interview-driven
+/create-skill "audit GraphQL schemas"   # seed it with the intent
+```
+
 ## Installation
 
 ### Via Plugin Marketplace
@@ -207,6 +223,7 @@ Find the most important **missing** tests in a change — ranked by risk, not co
 /plugin install plan-harden@colorpulse6-skills
 /plugin install dep-audit@colorpulse6-skills
 /plugin install test-gap@colorpulse6-skills
+/plugin install create-skill@colorpulse6-skills
 ```
 
 Once installed, the skills are available in any project on your machine.
@@ -329,12 +346,20 @@ claude-skills/
 │   │       ├── SKILL.md
 │   │       ├── references/dep-checklist.md
 │   │       └── scripts/manifest_scan.py  # offline diff scanner
-│   └── test-gap/                      # find the most important missing tests
+│   ├── test-gap/                      # find the most important missing tests
+│   │   ├── .claude-plugin/plugin.json
+│   │   ├── agents/gap-finder.md       # per-shard gap finder (parallel)
+│   │   └── skills/test-gap/
+│   │       ├── SKILL.md
+│   │       └── references/test-gap-heuristics.md
+│   └── create-skill/                  # meta-skill: author new skills the right way
 │       ├── .claude-plugin/plugin.json
-│       ├── agents/gap-finder.md       # per-shard gap finder (parallel)
-│       └── skills/test-gap/
+│       └── skills/create-skill/
 │           ├── SKILL.md
-│           └── references/test-gap-heuristics.md
+│           ├── references/
+│           │   ├── authoring-guide.md # frontmatter, disclosure, anti-patterns
+│           │   └── patterns.md        # inline-vs-agents, quality conventions
+│           └── scripts/scaffold.sh    # generates a new plugin skeleton
 └── README.md
 ```
 
