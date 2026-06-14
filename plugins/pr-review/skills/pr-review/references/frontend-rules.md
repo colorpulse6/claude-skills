@@ -4,6 +4,22 @@ Comprehensive frontend review rules for React/TypeScript projects. These rules a
 
 ---
 
+## Contents
+- React Hooks
+- Component Patterns
+- State Management
+- Async and Data Fetching
+- Accessibility
+- Performance
+- Forms
+- TypeScript
+- Security
+- CSS and Styling
+- Testing
+- Internationalization
+- Routing
+- Project-Specific Component Libraries
+
 ## React Hooks
 
 - **Dependency arrays:** Every value referenced inside a `useEffect`, `useMemo`, or `useCallback` must be listed in the dependency array. Missing dependencies lead to stale closures. Extra dependencies cause unnecessary re-runs. Both are Important findings.
