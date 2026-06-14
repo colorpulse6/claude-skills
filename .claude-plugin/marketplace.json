@@ -55,6 +55,16 @@
         "name": "Nichalas Barnes"
       },
       "homepage": "https://github.com/colorpulse6/claude-skills"
+    },
+    {
+      "name": "skill-starter",
+      "description": "Template plugin: an orchestrator skill that fans work out to parallel specialist agents and aggregates their findings into one report. Copy it to start a new skill.",
+      "category": "development",
+      "source": "./plugins/skill-starter",
+      "author": {
+        "name": "Nichalas Barnes"
+      },
+      "homepage": "https://github.com/colorpulse6/claude-skills"
     }
   ]
 }

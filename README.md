@@ -98,6 +98,26 @@ An independent, **separate-model** (Codex CLI / `gpt-5.5`) review of code — to
 
 **Usage:** ask for "a codex second opinion" / "what does Codex think" before stacking work on a just-shipped slice. Requires the Codex CLI installed.
 
+### `/skill-starter`
+
+A **template plugin** you copy to start a new skill. It's a complete, working example of the orchestrator pattern: one user-invocable skill resolves a target, fans the work out to parallel specialist subagents, and aggregates their findings into a single report.
+
+**Demonstrates:**
+- **`plugin.json` + `SKILL.md` frontmatter** - the minimum to make a skill discoverable and user-invocable
+- **Deterministic script layer** - `scripts/collect.sh` resolves units of work as JSON; judgment stays in markdown
+- **Parallel subagents** - spawns one `starter-worker` agent per batch (tool- and model-scoped) in a single message so they run concurrently
+- **Aggregation + output contract** - workers write `findings/<batch_id>.md`, the skill merges them into `REPORT.md`
+- **Error-handling table** - predictable behavior for empty matches, failed workers, unwritable output
+
+`TEMPLATE:` markers throughout show exactly where to swap in your own logic.
+
+**Usage:**
+```bash
+/skill-starter                  # default: audit repo-tracked text files
+/skill-starter "src/**/*.ts"    # audit a glob
+/skill-starter ./docs           # audit a directory
+```
+
 ## Installation
 
 ### Via Plugin Marketplace
@@ -112,6 +132,7 @@ An independent, **separate-model** (Codex CLI / `gpt-5.5`) review of code — to
 /plugin install push@colorpulse6-skills
 /plugin install session-recap@colorpulse6-skills
 /plugin install codex-second-opinion@colorpulse6-skills
+/plugin install skill-starter@colorpulse6-skills
 ```
 
 Once installed, the skills are available in any project on your machine.
@@ -185,16 +206,26 @@ claude-skills/
 │   │           └── scripts/
 │   │               ├── preflight.sh
 │   │               └── secret-scan.sh
-│   └── session-recap/
+│   ├── session-recap/
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json
+│   │   └── skills/
+│   │       └── session-recap/
+│   │           ├── SKILL.md
+│   │           └── scripts/
+│   │               ├── build_timeline.py
+│   │               ├── build_digests.py
+│   │               └── render_html.py
+│   └── skill-starter/                 # template plugin (orchestrator + parallel agents)
 │       ├── .claude-plugin/
 │       │   └── plugin.json
+│       ├── agents/
+│       │   └── starter-worker.md      # parallel specialist subagent
 │       └── skills/
-│           └── session-recap/
+│           └── skill-starter/
 │               ├── SKILL.md
 │               └── scripts/
-│                   ├── build_timeline.py
-│                   ├── build_digests.py
-│                   └── render_html.py
+│                   └── collect.sh     # deterministic unit collector
 └── README.md
 ```
 
