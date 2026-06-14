@@ -4,6 +4,23 @@ Comprehensive backend review rules for Node.js/TypeScript backends with Prisma, 
 
 ---
 
+## Contents
+- Domain-Driven Design Patterns
+- API Contracts and Schema Safety
+- Database Safety
+- Error Handling
+- Authentication & Authorization
+- GraphQL Specific
+- REST Specific
+- BullMQ / Background Jobs
+- ClickHouse (if detected)
+- Testing
+- Webhooks
+- Completeness Checks
+- TypeScript
+- Logging and Observability
+- Configuration and Secrets
+
 ## Domain-Driven Design Patterns
 
 Many mature backends organize code into domain modules (bounded contexts). The reviewer should recognize and enforce these patterns when the project follows them.

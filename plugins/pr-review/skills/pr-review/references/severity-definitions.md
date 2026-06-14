@@ -2,6 +2,12 @@
 
 This document defines the three severity levels used by the PR review skill. Every finding produced by the reviewer subagent must be tagged with one of these severities. When in doubt, err on the side of the more serious category - it is better to flag a borderline issue as Important than to bury a real bug as Minor.
 
+## Contents
+- Critical
+- Important
+- Minor
+- Guidelines for the Reviewer
+
 ## Critical
 
 Bugs, security issues, data loss, broken functionality. Blocks the merge. A Critical finding means "this will break something in production, leak data, or corrupt state". The reviewer should be confident the issue is real before tagging it Critical.

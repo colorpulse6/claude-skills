@@ -1,0 +1,7 @@
+{
+  "name": "plan-harden",
+  "description": "Adversarially review a design doc / spec / RFC BEFORE you build it. Runs a pre-mortem (\"it's 6 months out and this failed — why?\") plus parallel design-review lenses (edge cases, failure handling, data integrity, rollout/rollback, observability, scaling, security/STRIDE), then reconciles into a prioritized hardening report with an APPROVED/REVISE verdict.",
+  "author": {
+    "name": "Nichalas Barnes"
+  }
+}

@@ -2,6 +2,15 @@
 
 Return your review as a **single JSON object** matching the schema below. No prose before or after the JSON. No markdown code fences around it. The first character of your response must be `{` and the last character must be `}`.
 
+## Contents
+- Schema
+- Field Rules
+- Line Number Semantics
+- Using `suggestion_code` vs Prose Suggestion
+- Ordering
+- Empty Findings
+- Final Reminders
+
 ## Schema
 
 ```json

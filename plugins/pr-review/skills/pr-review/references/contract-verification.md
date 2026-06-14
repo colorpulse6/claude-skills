@@ -4,6 +4,14 @@ This document describes the pre-review contract verification scan. This scan run
 
 ---
 
+## Contents
+- What is Contract Verification?
+- Checks to Perform
+- How to Report Findings
+- Contract Verification Findings
+- Limitations
+- When to Skip
+
 ## What is Contract Verification?
 
 Contract verification is a deterministic, grep-and-read scan that checks alignment between layers of the application. Unlike the AI review, it doesn't reason about design or style - it only verifies that A and B agree on the shape of data flowing between them.

@@ -1,0 +1,7 @@
+{
+  "name": "dep-audit",
+  "description": "Audit dependency-manifest / lockfile changes in a diff. A zero-network offline pass scores the diff (semver deltas, pin loosening, lockfile-integrity changes, new install scripts, typosquatting, transitive blast radius); then per-ecosystem scanner agents run the real tools (osv-scanner, npm audit, pip-audit, cargo audit, govulncheck) and maintainer-health checks. Reconciles into one verdict per changed package.",
+  "author": {
+    "name": "Nichalas Barnes"
+  }
+}

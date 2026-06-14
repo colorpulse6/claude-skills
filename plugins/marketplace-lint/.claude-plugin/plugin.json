@@ -1,0 +1,7 @@
+{
+  "name": "marketplace-lint",
+  "description": "Validate every plugin in this marketplace for structural and registration consistency: valid plugin.json, name matches directory, registered in marketplace.json + README, SKILL.md frontmatter present, scripts executable + compilable, and references over 100 lines carry a Contents TOC. Catches the drift a growing skills repo accumulates.",
+  "author": {
+    "name": "Nichalas Barnes"
+  }
+}

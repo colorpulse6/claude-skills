@@ -1,0 +1,7 @@
+{
+  "name": "skill-starter",
+  "description": "Template plugin: an orchestrator skill that fans work out to parallel specialist agents and aggregates their findings into one report. Copy it to start a new skill.",
+  "author": {
+    "name": "Nichalas Barnes"
+  }
+}

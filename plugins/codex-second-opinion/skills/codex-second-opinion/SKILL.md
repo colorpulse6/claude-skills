@@ -2,6 +2,7 @@
 name: codex-second-opinion
 description: Get an independent, separate-model (Codex / gpt-5.5) review of code — a just-shipped feature, a risky change, or a substrate you're about to build on. Use to complement your own Claude subagent audits with a genuinely different model that has different blind spots. A separate model catches what same-model reviewers miss.
 user-invocable: true
+allowed-tools: Bash, Read, Write, Glob, Grep, Agent
 ---
 
 # Codex Second Opinion

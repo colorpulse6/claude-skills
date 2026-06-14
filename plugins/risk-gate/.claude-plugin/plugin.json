@@ -1,0 +1,7 @@
+{
+  "name": "risk-gate",
+  "description": "Triage a diff by risk and escalate only the risky parts to deeper / separate-model review. A cheap deterministic pass scores each changed file (danger paths, churn, blast radius); only HIGH-risk files get the expensive review (review-board / codex-second-opinion). Spends costly model-diversity where it actually pays.",
+  "author": {
+    "name": "Nichalas Barnes"
+  }
+}

@@ -98,6 +98,123 @@ An independent, **separate-model** (Codex CLI / `gpt-5.5`) review of code — to
 
 **Usage:** ask for "a codex second opinion" / "what does Codex think" before stacking work on a just-shipped slice. Requires the Codex CLI installed.
 
+### `/skill-starter`
+
+A **template plugin** you copy to start a new skill. It's a complete, working example of the orchestrator pattern: one user-invocable skill resolves a target, fans the work out to parallel specialist subagents, and aggregates their findings into a single report.
+
+**Demonstrates:**
+- **`plugin.json` + `SKILL.md` frontmatter** - the minimum to make a skill discoverable and user-invocable
+- **Deterministic script layer** - `scripts/collect.sh` resolves units of work as JSON; judgment stays in markdown
+- **Parallel subagents** - spawns one `starter-worker` agent per batch (tool- and model-scoped) in a single message so they run concurrently
+- **Aggregation + output contract** - workers write `findings/<batch_id>.md`, the skill merges them into `REPORT.md`
+- **Error-handling table** - predictable behavior for empty matches, failed workers, unwritable output
+
+`TEMPLATE:` markers throughout show exactly where to swap in your own logic.
+
+**Usage:**
+```bash
+/skill-starter                  # default: audit repo-tracked text files
+/skill-starter "src/**/*.ts"    # audit a glob
+/skill-starter ./docs           # audit a directory
+```
+
+### `/review-board`
+
+A multi-lens, multi-model code review conductor — the "parent" that composes parallel agents with `codex-second-opinion`.
+
+**What it does:** on a diff / PR / branch, it spawns several **scoped Claude review agents in parallel** (each hunting one failure-class) **while** a **separate model** (Codex) reviews independently, then reconciles everything into one ranked, cross-model verdict.
+
+**Two kinds of diversity at once:**
+- **Lens diversity** - `security`, `concurrency`, `performance`, `contract` lenses each tunnel-vision on one bug class, so nothing gets averaged away
+- **Model diversity** - Codex runs concurrently (its latency hides behind the lens work) and catches what same-model reasoning misses
+
+**Output:** `REVIEW-BOARD.md` with a verdict, a cross-model table, **convergence** (high-confidence), **net-new-from-Codex** (verify yourself), and sharpened disagreements. Falls back to Claude-only if the Codex CLI isn't installed.
+
+**Customize:** lenses live in `references/lenses.md` (one section each) and the agent is parameterized — add a lens without writing a new agent.
+
+**Usage:**
+```bash
+/review-board           # review the working diff
+/review-board 42        # review PR #42
+/review-board my-branch # diff against the merge base
+```
+
+### `/risk-gate`
+
+Triage-then-escalate: scores a diff cheaply, sends only the risky parts to deep review.
+
+**What it does:** a deterministic scorer (`risk_score.py`) rates each changed file on `risk = likelihood × blast-radius` (danger paths like auth/payments/migrations, churn, added control flow), buckets them Low/Medium/High, and escalates **only HIGH-risk files** to `review-board` (or `codex-second-opinion`). Spends the expensive model-diversity where it pays.
+
+**Usage:**
+```bash
+/risk-gate            # triage the working diff
+/risk-gate 42         # triage PR #42
+```
+
+### `/plan-harden`
+
+Adversarially review a design doc / spec / RFC **before** you build it — the cheapest place to fix a flaw.
+
+**What it does:** a context gate (what is it / who's affected / success), a **pre-mortem** ("it's 6 months out and this failed — why?"), and parallel `design-lens` agents (edge-cases, failure-handling, data-integrity, rollout-rollback, observability, scaling, security/STRIDE, dependencies). Reconciles into a five-part hardening report + an `APPROVED`/`REVISE` verdict. All findings are `[PLAN_RISK]` (prospective).
+
+**Usage:**
+```bash
+/plan-harden                 # newest design doc in docs/
+/plan-harden docs/rfc.md     # a specific doc
+```
+
+### `/dep-audit`
+
+Audit dependency-manifest / lockfile changes in two passes — cheap offline signal, then real tools.
+
+**What it does:** an offline pass (`manifest_scan.py`, zero network) flags semver deltas, range loosening, lockfile-integrity changes, new install scripts, and typosquats; then per-ecosystem `dep-scanner` agents run the real tools (`osv-scanner`, `npm audit`, `pip-audit`, `cargo audit`, `govulncheck`) plus maintainer-health checks, scoring each package on four axes (security / license / maintenance / breaking-change) with a Block/Warn/Monitor/Ignore verdict. Honest about offline limits.
+
+**Usage:**
+```bash
+/dep-audit            # audit the working diff's dependency changes
+/dep-audit 42         # audit PR #42
+```
+
+### `/test-gap`
+
+Find the most important **missing** tests in a change — ranked by risk, not coverage %.
+
+**What it does:** fans out `gap-finder` agents over the changed files; each traces codepaths (changed branches, error paths, boundaries) and ranks untested ones by `risk = impact × likelihood`, using the surviving-mutant test to catch covered-but-unasserted code. Optional coverage (`diff-cover`) and mutation (`Stryker`/`PIT`/`mutmut`/`cargo-mutants`) passes confirm gaps. Outputs prioritized tests-to-add (P0→P2) with proposed cases.
+
+**Usage:**
+```bash
+/test-gap             # find gaps in the working diff
+/test-gap 42          # PR #42
+```
+
+### `/create-skill`
+
+A **meta-skill** for authoring new skills/plugins in this repo the right way — it bakes in the research behind every other plugin here.
+
+**What it does:** interviews for intent + trigger phrases, picks the right shape (inline skill vs orchestrator + parallel agents), scaffolds the files (`scaffold.sh`), writes them against a distilled **authoring guide** (frontmatter, descriptions, progressive disclosure) and **patterns** reference (inline-vs-agents rubric, parameterized-agent pattern, confidence/severity/status-enum conventions), self-reviews against an **anti-pattern checklist**, and registers the plugin in the marketplace + README.
+
+**Two bundled references hold the substance:**
+- `authoring-guide.md` — frontmatter rules, the description discovery surface, progressive disclosure (<500-line SKILL.md, one-level refs, TOC over 100 lines), subagent scoping, and the anti-pattern checklist
+- `patterns.md` — when to fan out vs stay inline, the parameterized-agent pattern, scripts-for-determinism, and the shared quality conventions
+
+**Usage:**
+```bash
+/create-skill                       # interview-driven
+/create-skill "audit GraphQL schemas"   # seed it with the intent
+```
+
+### `/marketplace-lint`
+
+Validate that every plugin in this repo is structurally sound and properly registered — built *with* `/create-skill` as a dogfood.
+
+**What it checks:** valid `plugin.json` whose `name` matches its directory, registration in both `marketplace.json` and the README, `SKILL.md` frontmatter (`name` + `description`), scripts that are executable and (for Python) compilable, and references over 100 lines that open with a `## Contents` TOC. Emits findings as `error` (breaks discovery/use) or `warn` (drift), exits non-zero on errors. Inline skill + one deterministic script — no agents.
+
+**Usage:**
+```bash
+/marketplace-lint              # lint all plugins
+/marketplace-lint risk-gate    # lint just one
+```
+
 ## Installation
 
 ### Via Plugin Marketplace
@@ -112,6 +229,14 @@ An independent, **separate-model** (Codex CLI / `gpt-5.5`) review of code — to
 /plugin install push@colorpulse6-skills
 /plugin install session-recap@colorpulse6-skills
 /plugin install codex-second-opinion@colorpulse6-skills
+/plugin install skill-starter@colorpulse6-skills
+/plugin install review-board@colorpulse6-skills
+/plugin install risk-gate@colorpulse6-skills
+/plugin install plan-harden@colorpulse6-skills
+/plugin install dep-audit@colorpulse6-skills
+/plugin install test-gap@colorpulse6-skills
+/plugin install create-skill@colorpulse6-skills
+/plugin install marketplace-lint@colorpulse6-skills
 ```
 
 Once installed, the skills are available in any project on your machine.
@@ -185,16 +310,74 @@ claude-skills/
 │   │           └── scripts/
 │   │               ├── preflight.sh
 │   │               └── secret-scan.sh
-│   └── session-recap/
-│       ├── .claude-plugin/
-│       │   └── plugin.json
-│       └── skills/
-│           └── session-recap/
-│               ├── SKILL.md
-│               └── scripts/
-│                   ├── build_timeline.py
-│                   ├── build_digests.py
-│                   └── render_html.py
+│   ├── session-recap/
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json
+│   │   └── skills/
+│   │       └── session-recap/
+│   │           ├── SKILL.md
+│   │           └── scripts/
+│   │               ├── build_timeline.py
+│   │               ├── build_digests.py
+│   │               └── render_html.py
+│   ├── skill-starter/                 # template plugin (orchestrator + parallel agents)
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json
+│   │   ├── agents/
+│   │   │   └── starter-worker.md      # parallel specialist subagent
+│   │   └── skills/
+│   │       └── skill-starter/
+│   │           ├── SKILL.md
+│   │           └── scripts/
+│   │               └── collect.sh     # deterministic unit collector
+│   ├── review-board/                  # multi-lens + multi-model review conductor
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json
+│   │   ├── agents/
+│   │   │   └── review-lens.md         # parameterized single-lens reviewer (parallel)
+│   │   └── skills/
+│   │       └── review-board/
+│   │           ├── SKILL.md
+│   │           └── references/
+│   │               └── lenses.md      # per-lens checklists (add a lens here)
+│   ├── risk-gate/                     # triage a diff, escalate only risky parts
+│   │   ├── .claude-plugin/plugin.json
+│   │   └── skills/risk-gate/
+│   │       ├── SKILL.md
+│   │       ├── references/risk-signals.md
+│   │       └── scripts/risk_score.py  # deterministic per-file risk scorer
+│   ├── plan-harden/                   # adversarial pre-build design review
+│   │   ├── .claude-plugin/plugin.json
+│   │   ├── agents/design-lens.md      # parameterized adversarial lens (parallel)
+│   │   └── skills/plan-harden/
+│   │       ├── SKILL.md
+│   │       └── references/review-checklist.md
+│   ├── dep-audit/                     # dependency-change audit (offline + tools)
+│   │   ├── .claude-plugin/plugin.json
+│   │   ├── agents/dep-scanner.md      # per-ecosystem scanner (parallel)
+│   │   └── skills/dep-audit/
+│   │       ├── SKILL.md
+│   │       ├── references/dep-checklist.md
+│   │       └── scripts/manifest_scan.py  # offline diff scanner
+│   ├── test-gap/                      # find the most important missing tests
+│   │   ├── .claude-plugin/plugin.json
+│   │   ├── agents/gap-finder.md       # per-shard gap finder (parallel)
+│   │   └── skills/test-gap/
+│   │       ├── SKILL.md
+│   │       └── references/test-gap-heuristics.md
+│   ├── create-skill/                  # meta-skill: author new skills the right way
+│   │   ├── .claude-plugin/plugin.json
+│   │   └── skills/create-skill/
+│   │       ├── SKILL.md
+│   │       ├── references/
+│   │       │   ├── authoring-guide.md # frontmatter, disclosure, anti-patterns
+│   │       │   └── patterns.md        # inline-vs-agents, quality conventions
+│   │       └── scripts/scaffold.sh    # generates a new plugin skeleton
+│   └── marketplace-lint/              # validate plugin structure + registration
+│       ├── .claude-plugin/plugin.json
+│       └── skills/marketplace-lint/
+│           ├── SKILL.md
+│           └── scripts/marketplace-lint.py  # deterministic consistency checker
 └── README.md
 ```
 
