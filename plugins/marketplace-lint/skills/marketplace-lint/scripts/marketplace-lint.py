@@ -62,7 +62,9 @@ def lint_plugin(root, name, marketplace_names, marketplace_sources, readme):
     elif f"./plugins/{name}" not in marketplace_sources:
         f.append((WARN, "registration",
                   "marketplace.json source != ./plugins/<name>"))
-    if name not in readme:
+    # Use delimiter-bound forms (install ref `name@`, command `/name`, backticked)
+    # so short names like 'push' don't match incidental prose ("git push").
+    if not any(tok in readme for tok in (f"{name}@", f"/{name}", f"`{name}`")):
         f.append((WARN, "registration", "not mentioned in README.md"))
 
     # SKILL.md (find any under skills/)
@@ -81,6 +83,10 @@ def lint_plugin(root, name, marketplace_names, marketplace_sources, readme):
         for key in ("name", "description"):
             if not fm.get(key):
                 f.append((ERROR, "SKILL.md", f"{rel}: frontmatter missing '{key}'"))
+        skill_dir = os.path.basename(os.path.dirname(sk))
+        if fm.get("name") and fm["name"] != skill_dir:
+            f.append((WARN, "SKILL.md",
+                      f"{rel}: frontmatter name '{fm['name']}' != skill dir '{skill_dir}'"))
 
     # scripts: executable + python compiles
     for dp, _, fns in os.walk(pdir):
