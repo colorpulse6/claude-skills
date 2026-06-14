@@ -86,6 +86,18 @@ A browser-viewable HTML timeline of your recent Claude Code sessions — a dark 
 /session-recap 30       # Last 30 days
 ```
 
+### `codex-second-opinion`
+
+An independent, **separate-model** (Codex CLI / `gpt-5.5`) review of code — to complement your own Claude subagent audits with a model that has different blind spots. In practice a separate model surfaces real bugs that parallel same-model reviews all miss.
+
+**Features:**
+- **Independent findings first, then confirm/refute** - a neutral brief structure that gets genuine discovery, not a yes-man echo
+- **Read-only** - `codex exec --sandbox read-only`; reads + runs read-only commands, never edits
+- **Reconcile, don't paste** - convergence (high-confidence), net-new-from-Codex (verify yourself), and sharpened disagreements
+- **For the risky stuff** - concurrency, process lifecycle, async timing, money/LLM spend — where same-model reasoning shares blind spots
+
+**Usage:** ask for "a codex second opinion" / "what does Codex think" before stacking work on a just-shipped slice. Requires the Codex CLI installed.
+
 ## Installation
 
 ### Via Plugin Marketplace
@@ -99,6 +111,7 @@ A browser-viewable HTML timeline of your recent Claude Code sessions — a dark 
 /plugin install pr-respond@colorpulse6-skills
 /plugin install push@colorpulse6-skills
 /plugin install session-recap@colorpulse6-skills
+/plugin install codex-second-opinion@colorpulse6-skills
 ```
 
 Once installed, the skills are available in any project on your machine.

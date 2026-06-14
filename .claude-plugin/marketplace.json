@@ -45,6 +45,16 @@
         "name": "Nichalas Barnes"
       },
       "homepage": "https://github.com/colorpulse6/claude-skills"
+    },
+    {
+      "name": "codex-second-opinion",
+      "description": "Independent separate-model (Codex / gpt-5.5) code review to complement same-model Claude audits. Writes a neutral brief (independent findings first, then confirm/refute), runs `codex exec --sandbox read-only`, and reconciles \u2014 a different model catches what same-model reviewers miss.",
+      "category": "development",
+      "source": "./plugins/codex-second-opinion",
+      "author": {
+        "name": "Nichalas Barnes"
+      },
+      "homepage": "https://github.com/colorpulse6/claude-skills"
     }
   ]
 }

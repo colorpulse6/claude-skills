@@ -1,0 +1,7 @@
+{
+  "name": "codex-second-opinion",
+  "description": "Independent separate-model (Codex / gpt-5.5) code review to complement same-model Claude audits — different model, different blind spots",
+  "author": {
+    "name": "Nichalas Barnes"
+  }
+}
