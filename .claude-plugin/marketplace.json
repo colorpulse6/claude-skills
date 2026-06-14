@@ -125,6 +125,16 @@
         "name": "Nichalas Barnes"
       },
       "homepage": "https://github.com/colorpulse6/claude-skills"
+    },
+    {
+      "name": "marketplace-lint",
+      "description": "Validate every plugin in this marketplace for structural + registration consistency: valid plugin.json, name matches directory, registered in marketplace.json + README, SKILL.md frontmatter present, scripts executable + compilable, and references over 100 lines carrying a Contents TOC.",
+      "category": "development",
+      "source": "./plugins/marketplace-lint",
+      "author": {
+        "name": "Nichalas Barnes"
+      },
+      "homepage": "https://github.com/colorpulse6/claude-skills"
     }
   ]
 }

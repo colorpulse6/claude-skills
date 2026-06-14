@@ -203,6 +203,18 @@ A **meta-skill** for authoring new skills/plugins in this repo the right way —
 /create-skill "audit GraphQL schemas"   # seed it with the intent
 ```
 
+### `/marketplace-lint`
+
+Validate that every plugin in this repo is structurally sound and properly registered — built *with* `/create-skill` as a dogfood.
+
+**What it checks:** valid `plugin.json` whose `name` matches its directory, registration in both `marketplace.json` and the README, `SKILL.md` frontmatter (`name` + `description`), scripts that are executable and (for Python) compilable, and references over 100 lines that open with a `## Contents` TOC. Emits findings as `error` (breaks discovery/use) or `warn` (drift), exits non-zero on errors. Inline skill + one deterministic script — no agents.
+
+**Usage:**
+```bash
+/marketplace-lint              # lint all plugins
+/marketplace-lint risk-gate    # lint just one
+```
+
 ## Installation
 
 ### Via Plugin Marketplace
@@ -224,6 +236,7 @@ A **meta-skill** for authoring new skills/plugins in this repo the right way —
 /plugin install dep-audit@colorpulse6-skills
 /plugin install test-gap@colorpulse6-skills
 /plugin install create-skill@colorpulse6-skills
+/plugin install marketplace-lint@colorpulse6-skills
 ```
 
 Once installed, the skills are available in any project on your machine.
@@ -352,14 +365,19 @@ claude-skills/
 │   │   └── skills/test-gap/
 │   │       ├── SKILL.md
 │   │       └── references/test-gap-heuristics.md
-│   └── create-skill/                  # meta-skill: author new skills the right way
+│   ├── create-skill/                  # meta-skill: author new skills the right way
+│   │   ├── .claude-plugin/plugin.json
+│   │   └── skills/create-skill/
+│   │       ├── SKILL.md
+│   │       ├── references/
+│   │       │   ├── authoring-guide.md # frontmatter, disclosure, anti-patterns
+│   │       │   └── patterns.md        # inline-vs-agents, quality conventions
+│   │       └── scripts/scaffold.sh    # generates a new plugin skeleton
+│   └── marketplace-lint/              # validate plugin structure + registration
 │       ├── .claude-plugin/plugin.json
-│       └── skills/create-skill/
+│       └── skills/marketplace-lint/
 │           ├── SKILL.md
-│           ├── references/
-│           │   ├── authoring-guide.md # frontmatter, disclosure, anti-patterns
-│           │   └── patterns.md        # inline-vs-agents, quality conventions
-│           └── scripts/scaffold.sh    # generates a new plugin skeleton
+│           └── scripts/marketplace-lint.py  # deterministic consistency checker
 └── README.md
 ```
 

@@ -19,12 +19,14 @@ emit_json() {
   while IFS= read -r line; do
     [ -n "$line" ] && paths+=("$line")
   done
-  printf '{\n  "target": "%s",\n  "count": %d,\n  "units": [' "$label" "${#paths[@]}"
+  local esc_label=${label//\\/\\\\}; esc_label=${esc_label//\"/\\\"}
+  printf '{\n  "target": "%s",\n  "count": %d,\n  "units": [' "$esc_label" "${#paths[@]}"
   local first=1
   for p in "${paths[@]:-}"; do
     [ -z "$p" ] && continue
     if [ "$first" -eq 1 ]; then first=0; else printf ','; fi
-    printf '\n    "%s"' "$p"
+    local esc=${p//\\/\\\\}; esc=${esc//\"/\\\"}
+    printf '\n    "%s"' "$esc"
   done
   [ "${#paths[@]}" -gt 0 ] && printf '\n  '
   printf ']\n}\n'
