@@ -41,9 +41,10 @@ A neutral brief that hides your conclusions until the cross-check section is wha
 
 ```bash
 cd <repo-root>
-codex exec --sandbox read-only "$(cat /tmp/codex-<feature>-review-brief.md)" 2>&1
+codex exec --sandbox read-only "$(cat /tmp/codex-<feature>-review-brief.md)" < /dev/null 2>&1
 ```
 
+- **Always redirect stdin from `/dev/null`** (the `< /dev/null` above). `codex exec` always probes stdin for additional prompt input (it prints `Reading additional input from stdin...`); if stdin is left open on a non-TTY / backgrounded run, it **blocks forever waiting for EOF** — an observed 2h40m hang. `/dev/null` gives instant EOF so it proceeds with the arg prompt. This matters most precisely because the note below says to background long runs.
 - `--sandbox read-only` = it can read + run read-only commands, never edits. `exec` = non-interactive (`approval: never`), so it won't block on prompts.
 - It runs in the repo's working dir by default, so its file:line citations line up.
 - Use a long timeout (it's an `xhigh` reasoning run; budget several minutes). If it might exceed your tool's max, run it backgrounded and poll.
