@@ -1,0 +1,5 @@
+{
+  "name": "rehydrate",
+  "description": "Restore full working context for a project after time away: read its dated context pack, verify every load-bearing claim against live git/filesystem state, then deliver a visual status brief with the recommended next thread.",
+  "author": { "name": "Nichalas Barnes" }
+}

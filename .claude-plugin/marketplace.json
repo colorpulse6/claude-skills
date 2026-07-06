@@ -135,6 +135,46 @@
         "name": "Nichalas Barnes"
       },
       "homepage": "https://github.com/colorpulse6/claude-skills"
+    },
+    {
+      "name": "fable-method",
+      "description": "The operating method Fable (Claude Fable 5) left behind: an evidence-first working loop (orient, map, decide, act, verify, report) plus the judgment layer — calibration, scope discipline, root-cause tracing, delegation briefs, communication standards. Tool-agnostic: works in Claude Code, Codex, or any capable agent harness.",
+      "category": "productivity",
+      "source": "./plugins/fable-method",
+      "author": {
+        "name": "Nichalas Barnes"
+      },
+      "homepage": "https://github.com/colorpulse6/claude-skills"
+    },
+    {
+      "name": "rehydrate",
+      "description": "Restore full working context for a project after time away: read its dated context pack, verify every load-bearing claim against live git/filesystem state, then deliver a visual status brief with the recommended next thread. Packs heal on every use.",
+      "category": "productivity",
+      "source": "./plugins/rehydrate",
+      "author": {
+        "name": "Nichalas Barnes"
+      },
+      "homepage": "https://github.com/colorpulse6/claude-skills"
+    },
+    {
+      "name": "marketing-ops",
+      "description": "Weekly operator rhythm for an autonomous faceless-content growth engine: automation health, queue integrity, the rendered-but-unposted pile, product-truth gating, funnel pulse, posting rituals, and launch execution from channel playbooks (Reddit, Product Hunt, HN, LinkedIn, short-form, cold email).",
+      "category": "marketing",
+      "source": "./plugins/marketing-ops",
+      "author": {
+        "name": "Nichalas Barnes"
+      },
+      "homepage": "https://github.com/colorpulse6/claude-skills"
+    },
+    {
+      "name": "handoff",
+      "description": "End-of-session protocol: leave the repo consistent, log the session to the knowledge base via kblog, name every open thread, and heal drifted context packs — so the next agent or the returning human resumes in minutes, not archaeology.",
+      "category": "productivity",
+      "source": "./plugins/handoff",
+      "author": {
+        "name": "Nichalas Barnes"
+      },
+      "homepage": "https://github.com/colorpulse6/claude-skills"
     }
   ]
 }
