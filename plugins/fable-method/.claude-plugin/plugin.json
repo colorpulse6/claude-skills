@@ -1,0 +1,5 @@
+{
+  "name": "fable-method",
+  "description": "The operating method Fable left behind: an evidence-first loop (orient, map, decide, act, verify, report) plus the judgment layer for calibration, scope, and communication. Works in Claude Code, Codex, or any capable agent harness.",
+  "author": { "name": "Nichalas Barnes" }
+}

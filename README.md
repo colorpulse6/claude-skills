@@ -215,6 +215,55 @@ Validate that every plugin in this repo is structurally sound and properly regis
 /marketplace-lint risk-gate    # lint just one
 ```
 
+### `/fable-method`
+
+The operating method **Claude Fable 5 left behind** on its last publicly-available day — how it worked, written for whatever agent reads it next (Claude, Codex, or anything newer).
+
+**What it teaches:** an evidence-first operating loop (orient → map → decide → act → verify → report), calibration rules for when to act vs ask vs stop, and red flags that catch rationalization ("it probably works" → run it). Four references carry the depth: `operating-principles.md` (the judgment layer — root cause, scope discipline, reversibility gate, when to stop), `research-method.md` (mapping unknown systems, delegation briefs with output contracts, the dual-review workflow), `communication.md` (outcome-first reporting; visual-first for this user), and `codex-adaptation.md` (running all of it outside Claude Code).
+
+**Usage:**
+```bash
+/fable-method                          # load the method at task start
+/fable-method "migrate the billing service"   # seed it with the task
+```
+
+### `/rehydrate`
+
+Restore full working context for a project after time away — a returning human or a fresh agent gets briefed in minutes.
+
+**What it does:** reads the project's dated context pack (`~/kb/docs/handoff/`), **verifies every load-bearing claim against live git/filesystem state** (packs are maps, not territory), then delivers a visual status brief: where you left off, what changed since, landmines, and ONE recommended next thread — plus the full open-threads list. Heals stale packs on every use; builds a pack from live sources if none exists.
+
+**Usage:**
+```bash
+/rehydrate               # full sweep across all packs
+/rehydrate jt3           # one project
+```
+
+### `/marketing-ops`
+
+The operator layer for an autonomous content/growth engine — the machine researches, writes, and renders; this runs the four things machines shouldn't do alone: verify health, approve truth, distribute, decide from metrics.
+
+**What it does:** a five-station weekly check-in (automation health, queue runway, the rendered-but-unposted pile, product-truth gate, funnel pulse), a posting ritual (prepare, never publish), and launch mode. References: `channel-playbooks.md` (Reddit, Product Hunt, HN, LinkedIn, faceless short-form, cold email — all rules-aware) and `launch-checklist.md` (gates → assets → sequencing → day-of runbook → T+7 review).
+
+**Usage:**
+```bash
+/marketing-ops           # weekly check-in
+/marketing-ops post      # today's posting ritual
+/marketing-ops launch job-toast
+```
+
+### `/handoff`
+
+Close a working session so nothing is forgotten — the counterpart to `/rehydrate`.
+
+**What it does:** inventories the session (done-verified vs unverified vs abandoned — tiers never blur), leaves the repo consistent (branch WIP, never silent dirt), logs each thread to the knowledge base via `kblog` (one line: thread, state, next move), names EVERY open thread in a closing table, and heals any context pack the session made stale.
+
+**Usage:**
+```bash
+/handoff                             # full closing protocol
+/handoff "shipped billing-v2 gate A" # seed the summary
+```
+
 ## Installation
 
 ### Via Plugin Marketplace
@@ -237,7 +286,13 @@ Validate that every plugin in this repo is structurally sound and properly regis
 /plugin install test-gap@colorpulse6-skills
 /plugin install create-skill@colorpulse6-skills
 /plugin install marketplace-lint@colorpulse6-skills
+/plugin install fable-method@colorpulse6-skills
+/plugin install rehydrate@colorpulse6-skills
+/plugin install marketing-ops@colorpulse6-skills
+/plugin install handoff@colorpulse6-skills
 ```
+
+**Using Codex or another non-Claude harness?** See [`AGENTS.md`](AGENTS.md) — the skills are written tool-agnostically and load fine as plain instructions.
 
 Once installed, the skills are available in any project on your machine.
 
@@ -373,11 +428,34 @@ claude-skills/
 │   │       │   ├── authoring-guide.md # frontmatter, disclosure, anti-patterns
 │   │       │   └── patterns.md        # inline-vs-agents, quality conventions
 │   │       └── scripts/scaffold.sh    # generates a new plugin skeleton
-│   └── marketplace-lint/              # validate plugin structure + registration
+│   ├── marketplace-lint/              # validate plugin structure + registration
+│   │   ├── .claude-plugin/plugin.json
+│   │   └── skills/marketplace-lint/
+│   │       ├── SKILL.md
+│   │       └── scripts/marketplace-lint.py  # deterministic consistency checker
+│   ├── fable-method/                  # the operating method Fable left behind
+│   │   ├── .claude-plugin/plugin.json
+│   │   └── skills/fable-method/
+│   │       ├── SKILL.md
+│   │       └── references/
+│   │           ├── operating-principles.md  # the judgment layer
+│   │           ├── research-method.md       # mapping, delegation, dual review
+│   │           ├── communication.md         # outcome-first, visual-first reporting
+│   │           └── codex-adaptation.md      # running it outside Claude Code
+│   ├── rehydrate/                     # verified context restore after time away
+│   │   ├── .claude-plugin/plugin.json
+│   │   └── skills/rehydrate/SKILL.md
+│   ├── marketing-ops/                 # operator rhythm for the growth engine
+│   │   ├── .claude-plugin/plugin.json
+│   │   └── skills/marketing-ops/
+│   │       ├── SKILL.md
+│   │       └── references/
+│   │           ├── channel-playbooks.md     # Reddit/PH/HN/LinkedIn/short-form/email
+│   │           └── launch-checklist.md      # gates → assets → day-of → T+7
+│   └── handoff/                       # end-of-session protocol (pairs with rehydrate)
 │       ├── .claude-plugin/plugin.json
-│       └── skills/marketplace-lint/
-│           ├── SKILL.md
-│           └── scripts/marketplace-lint.py  # deterministic consistency checker
+│       └── skills/handoff/SKILL.md
+├── AGENTS.md                          # entry point for Codex / non-Claude agents
 └── README.md
 ```
 

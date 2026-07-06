@@ -1,0 +1,5 @@
+{
+  "name": "handoff",
+  "description": "End-of-session protocol: leave the repo consistent, log the session to the knowledge base, name every open thread, and heal drifted context packs — so the next agent (or the returning human) resumes in minutes, not archaeology.",
+  "author": { "name": "Nichalas Barnes" }
+}
