@@ -1,6 +1,6 @@
 ---
 name: rehydrate
-description: Restores working context for a project after time away by reading its dated context pack, verifying claims against live git/filesystem state, and briefing with a visual status map plus the recommended next thread. Use when the user says "what was I working on", "resume <project>", "getting back to <project>", "catch me up", "back from leave/vacation/break", or invokes /rehydrate.
+description: Restores working context for a project after time away by reading its dated context pack, verifying claims against live git/filesystem state, and briefing with a visual status map plus the recommended next thread. Use when the user says "what was I working on", "resume <project>", "getting back to <project>", "catch me up", "back from leave/vacation/break", or invokes /rehydrate. This restores context to resume ONE project — for a visual timeline of past sessions use /session-recap; for the cross-project forgotten-work radar use /open-threads.
 user-invocable: true
 argument-hint: "[project name, or blank for a full sweep]"
 allowed-tools: Read, Bash, Glob, Grep, Write, Edit

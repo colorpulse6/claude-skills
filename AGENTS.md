@@ -18,6 +18,8 @@ You are reading the entry point for agents operating WITHOUT the Claude Code plu
 | Skill | Use when | Notes for non-CC harnesses |
 |---|---|---|
 | `fable-method` | Starting any substantial/ambiguous task | Fully tool-agnostic |
+| `open-threads` | "What am I forgetting" — cross-project forgotten-work radar | `sweep.py` runs anywhere Python does; packs live in `~/kb/docs/handoff/` |
+| `architect` | Big delegatable builds: frontier plans, cheap lanes execute | From Codex, invert the lanes: Codex architects, `claude -p` (or a cheaper Codex tier via `-m`) executes |
 | `rehydrate` | "What was I working on", resuming a project, back from a break | Needs shell + file read; packs live in `~/kb/docs/handoff/` |
 | `handoff` | Ending a session with anything unfinished | Uses `~/kb/scripts/kblog` (plain shell script) |
 | `marketing-ops` | Weekly marketing check-in, posting ritual, launches | Prepare-only: never publishes anything itself |

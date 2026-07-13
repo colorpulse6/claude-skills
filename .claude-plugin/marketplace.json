@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "colorpulse6-skills",
-  "description": "Personal Claude Code skills for PR review and quality-gated push pipelines. Auto-detects project type (frontend/backend/full-stack) and package manager.",
+  "description": "Personal Claude Code plugin marketplace: a code-review ladder (risk-gate / pr-review / review-board / codex-second-opinion), quality-gated push, session continuity (rehydrate / handoff / open-threads / session-recap), the Fable operating method (fable-method / architect), and skill-authoring meta-tools.",
   "owner": {
     "name": "Nichalas Barnes"
   },
@@ -48,7 +48,7 @@
     },
     {
       "name": "codex-second-opinion",
-      "description": "Independent separate-model (Codex / gpt-5.5) code review to complement same-model Claude audits. Writes a neutral brief (independent findings first, then confirm/refute), runs `codex exec --sandbox read-only`, and reconciles \u2014 a different model catches what same-model reviewers miss.",
+      "description": "Independent separate-model (OpenAI Codex CLI, flagship GPT tier) code review to complement same-model Claude audits. Writes a neutral brief (independent findings first, then confirm/refute), runs `codex exec --sandbox read-only`, and reconciles \u2014 a different model catches what same-model reviewers miss.",
       "category": "development",
       "source": "./plugins/codex-second-opinion",
       "author": {
@@ -161,6 +161,26 @@
       "description": "Weekly operator rhythm for an autonomous faceless-content growth engine: automation health, queue integrity, the rendered-but-unposted pile, product-truth gating, funnel pulse, posting rituals, and launch execution from channel playbooks (Reddit, Product Hunt, HN, LinkedIn, short-form, cold email).",
       "category": "marketing",
       "source": "./plugins/marketing-ops",
+      "author": {
+        "name": "Nichalas Barnes"
+      },
+      "homepage": "https://github.com/colorpulse6/claude-skills"
+    },
+    {
+      "name": "open-threads",
+      "description": "Cross-project forgotten-work radar. Sweeps every local git repo for uncommitted/unpushed/stashed work, cross-references context-pack threads, and ranks what's most at risk of being forgotten — with one first move each.",
+      "category": "productivity",
+      "source": "./plugins/open-threads",
+      "author": {
+        "name": "Nichalas Barnes"
+      },
+      "homepage": "https://github.com/colorpulse6/claude-skills"
+    },
+    {
+      "name": "architect",
+      "description": "Frontier-model-plans / cheap-model-executes delegation loop: decision-complete spec, cheap execution lanes (Claude subagent or Codex CLI), implementer/reviewer split, and claim-ladder acceptance (WRITTEN < RUNS < VERIFIED).",
+      "category": "development",
+      "source": "./plugins/architect",
       "author": {
         "name": "Nichalas Barnes"
       },

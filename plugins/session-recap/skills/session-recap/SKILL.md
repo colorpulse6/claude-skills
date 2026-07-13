@@ -7,7 +7,8 @@ description: >-
   ~/.claude/projects transcripts; defaults to the last 7 days (pass a number or
   "daily"/"weekly" to change). Use when the user wants a daily or weekly recap,
   asks "what did I work on", "summarize my Claude sessions", "session timeline",
-  or invokes /session-recap.
+  or invokes /session-recap. This is a visual record of what already happened —
+  to restore working context and resume a project, use /rehydrate instead.
 user-invocable: true
 allowed-tools: Bash, Read, Write, Agent
 ---

@@ -1,6 +1,6 @@
 # Claude Skills
 
-Personal Claude Code skills for PR review and quality-gated push pipelines. Works across frontend and backend projects with auto-detection - no per-project configuration needed.
+A personal Claude Code plugin marketplace, 19 plugins deep: a code-review ladder (risk-gate → pr-review → review-board, with Codex as a second model), a quality-gated push pipeline, session continuity (rehydrate / handoff / open-threads / session-recap), the Fable operating method (fable-method / architect), operator rhythms (marketing-ops), and meta-skills for authoring more (create-skill / marketplace-lint / skill-starter). Auto-detects project type — no per-project configuration needed.
 
 ## Skills
 
@@ -88,7 +88,7 @@ A browser-viewable HTML timeline of your recent Claude Code sessions — a dark 
 
 ### `codex-second-opinion`
 
-An independent, **separate-model** (Codex CLI / `gpt-5.5`) review of code — to complement your own Claude subagent audits with a model that has different blind spots. In practice a separate model surfaces real bugs that parallel same-model reviews all miss.
+An independent, **separate-model** (Codex CLI, flagship GPT tier — `sol` in current generations) review of code — to complement your own Claude subagent audits with a model that has different blind spots. In practice a separate model surfaces real bugs that parallel same-model reviews all miss.
 
 **Features:**
 - **Independent findings first, then confirm/refute** - a neutral brief structure that gets genuine discovery, not a yes-man echo
@@ -264,6 +264,29 @@ Close a working session so nothing is forgotten — the counterpart to `/rehydra
 /handoff "shipped billing-v2 gate A" # seed the summary
 ```
 
+### `/open-threads`
+
+Cross-project forgotten-work radar — the counterweight to "you finish what you remember."
+
+**What it does:** a deterministic sweep (`sweep.py`) finds every local git repo and measures the forgotten work in it (dirty files, unpushed commits, never-pushed branches, stashes, staleness); the skill cross-references the context packs' declared threads, ages everything, and reports the **top 5 threads at risk** with one 15-minute first move each — plus pack-drift findings (pack claims that no longer match live git state). Read-only: it points at `/handoff` and `/rehydrate` for healing.
+
+**Usage:**
+```bash
+/open-threads                     # full radar sweep
+/open-threads ~/somewhere/else    # add extra scan roots
+```
+
+### `/architect`
+
+Frontier-model-plans, cheap-model-executes — spend expensive tokens on judgment, not typing.
+
+**What it does:** writes a **decision-complete spec** (five-part contract: context, task, constraints, output contract, done criteria — every architectural fork decided), dispatches implementation to a cheap lane (cheaper Claude subagent or Codex CLI), runs **fresh-context adversarial review** (implementer never reviews; reviewer never implements), and accepts work only at the top of the **claim ladder** (WRITTEN < RUNS < VERIFIED — the architect re-runs the done-criteria commands itself). Lanes fail loudly; a BLOCKED executor means the spec was incomplete, and the spec gets fixed, not the guess.
+
+**Usage:**
+```bash
+/architect "migrate the billing service to the new API"
+```
+
 ## Installation
 
 ### Via Plugin Marketplace
@@ -290,6 +313,8 @@ Close a working session so nothing is forgotten — the counterpart to `/rehydra
 /plugin install rehydrate@colorpulse6-skills
 /plugin install marketing-ops@colorpulse6-skills
 /plugin install handoff@colorpulse6-skills
+/plugin install open-threads@colorpulse6-skills
+/plugin install architect@colorpulse6-skills
 ```
 
 **Using Codex or another non-Claude harness?** See [`AGENTS.md`](AGENTS.md) — the skills are written tool-agnostically and load fine as plain instructions.
@@ -452,9 +477,20 @@ claude-skills/
 │   │       └── references/
 │   │           ├── channel-playbooks.md     # Reddit/PH/HN/LinkedIn/short-form/email
 │   │           └── launch-checklist.md      # gates → assets → day-of → T+7
-│   └── handoff/                       # end-of-session protocol (pairs with rehydrate)
+│   ├── handoff/                       # end-of-session protocol (pairs with rehydrate)
+│   │   ├── .claude-plugin/plugin.json
+│   │   └── skills/handoff/SKILL.md
+│   ├── open-threads/                  # cross-project forgotten-work radar
+│   │   ├── .claude-plugin/plugin.json
+│   │   └── skills/open-threads/
+│   │       ├── SKILL.md
+│   │       ├── references/triage.md         # aging thresholds, noise filters, drift rules
+│   │       └── scripts/sweep.py             # deterministic git-repo sweep
+│   └── architect/                     # frontier-plans / cheap-executes loop
 │       ├── .claude-plugin/plugin.json
-│       └── skills/handoff/SKILL.md
+│       └── skills/architect/
+│           ├── SKILL.md
+│           └── references/spec-contract.md  # five-part contract, lanes, briefs
 ├── AGENTS.md                          # entry point for Codex / non-Claude agents
 └── README.md
 ```

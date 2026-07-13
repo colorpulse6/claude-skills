@@ -1,0 +1,7 @@
+{
+  "name": "open-threads",
+  "description": "Cross-project forgotten-work radar. Sweeps every local git repo for uncommitted/unpushed/stashed work, cross-references context-pack threads, and ranks what's most at risk of being forgotten — with one first move each.",
+  "author": {
+    "name": "Nichalas Barnes"
+  }
+}
