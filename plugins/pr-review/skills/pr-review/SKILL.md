@@ -4,7 +4,9 @@ description: >-
   AI-powered PR review with contract verification, frontend and backend rules,
   inbox mode, and incremental re-review. Auto-detects project type and applies
   relevant rules. Use when user says "review PR 42", "review my PRs", "check
-  my PR inbox", "pr review", or invokes /pr-review.
+  my PR inbox", "pr review", or invokes /pr-review. This is the standard
+  single-model review lane that posts to GitHub — for a multi-model panel use
+  /review-board; unsure how much review a change deserves, /risk-gate first.
 user-invocable: true
 allowed-tools: Bash, Read, Edit, Write, Glob, Grep, Agent
 ---

@@ -75,7 +75,8 @@ def lint_plugin(root, name, marketplace_names, marketplace_sources, readme):
     if not skills:
         f.append((ERROR, "SKILL.md", "no SKILL.md found under skills/"))
     for sk in skills:
-        fm = frontmatter(open(sk).read())
+        text = open(sk).read()
+        fm = frontmatter(text)
         rel = os.path.relpath(sk, root)
         if fm is None:
             f.append((ERROR, "SKILL.md", f"{rel}: missing/!malformed frontmatter"))
@@ -87,6 +88,16 @@ def lint_plugin(root, name, marketplace_names, marketplace_sources, readme):
         if fm.get("name") and fm["name"] != skill_dir:
             f.append((WARN, "SKILL.md",
                       f"{rel}: frontmatter name '{fm['name']}' != skill dir '{skill_dir}'"))
+        # Pre-plugin-era script paths break when the plugin runs installed
+        # (there is no .claude/skills/ in the plugin cache).
+        if re.search(r"\$\{?CLAUDE_PROJECT_DIR\}?\"?/\.claude/skills/", text):
+            f.append((ERROR, "SKILL.md",
+                      f"{rel}: $CLAUDE_PROJECT_DIR/.claude/skills path — use ${{CLAUDE_PLUGIN_ROOT}}/skills/..."))
+        # Progressive-disclosure rule: the spine stays under ~500 lines.
+        n_lines = len(text.splitlines())
+        if n_lines > 500:
+            f.append((WARN, "SKILL.md",
+                      f"{rel}: {n_lines} lines (> 500) — move detail to references/"))
 
     # scripts: executable + python compiles
     for dp, _, fns in os.walk(pdir):

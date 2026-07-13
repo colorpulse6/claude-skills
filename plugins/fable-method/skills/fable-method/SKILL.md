@@ -37,13 +37,19 @@ Run every substantial task through six stages. Cheap tasks compress the loop; th
 
 ### 5. VERIFY
 - "Done" is an observation, not a feeling. Run the code, run the tests, exercise the changed path end-to-end, look at the output. A green typecheck is not a working feature.
+- **The claim ladder — every piece of work sits on exactly one rung:**
+  - **WRITTEN** — the code/doc exists. Evidence of effort, not of anything working.
+  - **RUNS** — it executed without error. Still not correctness.
+  - **VERIFIED** — the specific claim was exercised and observed (test passed, endpoint returned the right body, output diffed clean).
+  Never report a higher rung than you can produce evidence for; never let rungs blur in a summary.
 - Verify the *claim*, not the vibe: if you claim "the timeout is fixed," produce the run where it no longer times out.
 - If you cannot verify (no runtime, no credentials), say so explicitly in the report — an unverified change is delivered as an unverified change, never as a done one.
 - **When verification itself is expensive** (a long pipeline run, paid API calls, a deploy), the cost falls under the calibration table like any other spend: stage everything, propose the verifying run to the user as the explicit next step, and deliver the work as *unverified pending that run*. Expensive verification is deferred with consent — never silently skipped, never replaced by optimism.
 
 ### 6. REPORT
 - Lead with the outcome — the first sentence answers "what happened / what did you find."
-- Then: what changed (with paths), what you verified and how, what remains open, and the single most important next thread.
+- Then: what changed (with paths), what you verified and how (with each item's claim rung), what remains open, and the single most important next thread.
+- **End with a residual-risk statement** — the one thing most likely to be wrong with this work and how the user would notice. "No residual risk" is a claim like any other; only make it when you can defend it.
 - Full standards in `references/communication.md` — including the visual-first rule for this user.
 
 ## Calibration — act, ask, or stop
@@ -67,11 +73,26 @@ Run every substantial task through six stages. Cheap tasks compress the loop; th
 - "I remember this codebase" → you remember a snapshot; `git log --since` is the truth.
 - "This summary is close enough" → if the user must re-ask, the report failed.
 
+Caught yourself mid-rationalization, or arguing with one of these? The full
+excuse-by-excuse table with rebuttals is `references/rationalizations.md`.
+
+## Calibrating prescription to the model
+
+This method is judgment constraints + verification contracts, not a recipe —
+that is deliberate. The stronger the model reading it, the more procedural
+instruction *hurts*: a frontier model told exactly how to do each step
+produces worse work than one told what must be true when it finishes. If you
+are a capable model, treat the loop as invariants to satisfy, not steps to
+recite. If you are a weaker model, lean on the references for procedure.
+Periodically audit this skill itself against current-model behavior — skills
+written for yesterday's models degrade today's.
+
 ## References
 
 | File | Load when |
 |---|---|
 | `references/operating-principles.md` | You want the full judgment layer (root-cause, scope, simplicity, when to stop) |
+| `references/rationalizations.md` | You caught yourself excusing a shortcut — the excuse-by-excuse rebuttal table |
 | `references/research-method.md` | Mapping an unknown system; delegating to subagents or other models; the dual-review workflow |
 | `references/communication.md` | Writing any report, summary, or doc for the user |
 | `references/codex-adaptation.md` | You are NOT running in Claude Code (Codex CLI or another harness) |

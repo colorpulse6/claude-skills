@@ -4,8 +4,9 @@ description: >-
   Validate every plugin in this marketplace for structural + registration
   consistency — valid plugin.json, name matches its directory, registered in
   marketplace.json and the README, SKILL.md frontmatter present, scripts
-  executable and compilable, and references over 100 lines carrying a Contents
-  TOC. Use when the user says "lint the marketplace", "validate the plugins",
+  executable and compilable, references over 100 lines carrying a Contents
+  TOC, no pre-plugin-era script paths, and SKILL.md spines under 500 lines.
+  Use when the user says "lint the marketplace", "validate the plugins",
   "check the skills repo", "are all my plugins registered", or invokes
   /marketplace-lint. Run it before pushing a new or edited plugin.
 user-invocable: true
@@ -46,6 +47,11 @@ What it checks per plugin:
 - **Scripts** under the plugin are executable (`+x`); `.py` scripts compile.
 - **References** over 100 lines open with a `## Contents` TOC (within their first
   ~15 lines).
+- **Pre-plugin-era paths** — a SKILL.md that resolves its scripts via
+  `.claude/skills/` under `$CLAUDE_PROJECT_DIR` is an error (breaks when
+  installed; use `${CLAUDE_PLUGIN_ROOT}/skills/...`).
+- **Spine size** — a SKILL.md over 500 lines warns (progressive-disclosure
+  rule: move detail to `references/`).
 
 ## Step 2: Triage & report
 

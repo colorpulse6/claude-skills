@@ -7,7 +7,8 @@ description: >-
   files Low/Medium/High, then escalates only HIGH-risk files to a heavyweight
   separate-model review (review-board or codex-second-opinion). Use when user
   says "risk gate", "what's risky here", "triage this diff", "is this safe to
-  merge", or invokes /risk-gate.
+  merge", or invokes /risk-gate. This is the cheap entry point of the review
+  ladder — start here when unsure how much review a change deserves.
 user-invocable: true
 argument-hint: "[PR number | branch | (default: working diff)]"
 allowed-tools: Bash, Read, Write, Glob, Grep, Agent

@@ -7,7 +7,9 @@ description: >-
   independently, then reconciles every finding into one cross-model table:
   convergence (high-confidence), net-new-from-Codex (verify), and sharpened
   disagreements. Use when user says "review board", "full review", "multi-lens
-  review", "audit this with all the models", or invokes /review-board.
+  review", "audit this with all the models", or invokes /review-board. This is
+  the heavyweight lane of the review ladder — for a routine review that posts
+  to GitHub use /pr-review; to spend this only where it pays, /risk-gate first.
 user-invocable: true
 argument-hint: "[PR number | branch | (default: working diff)]"
 allowed-tools: Bash, Read, Write, Glob, Grep, Agent
@@ -82,8 +84,17 @@ So it runs concurrently with the Claude lenses:
 
    ```bash
    cd <repo-root>
-   codex exec --sandbox read-only "$(cat /tmp/review-board-codex-brief.md)" > ./.review-board-out/codex.out 2>&1 &
+   codex exec --sandbox read-only "$(cat /tmp/review-board-codex-brief.md)" < /dev/null > ./.review-board-out/codex.out 2>&1 &
    ```
+
+   The `< /dev/null` is mandatory: `codex exec` probes stdin for additional
+   prompt input, and a backgrounded run with stdin open blocks forever waiting
+   for EOF (observed 2h40m hang).
+
+   Run the review on Codex's **flagship tier** (the `-sol` suffix in current
+   generations) — if the configured default is a mid/speed tier, add
+   `-m <current>-sol`. A cheap-tier reviewer weakens the cross-model signal
+   this whole step exists for.
 
 Do not wait on it yet.
 

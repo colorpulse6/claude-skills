@@ -1,13 +1,13 @@
 ---
 name: codex-second-opinion
-description: Get an independent, separate-model (Codex / gpt-5.5) review of code — a just-shipped feature, a risky change, or a substrate you're about to build on. Use to complement your own Claude subagent audits with a genuinely different model that has different blind spots. A separate model catches what same-model reviewers miss.
+description: Get an independent, separate-model (OpenAI Codex CLI, flagship GPT tier) review of code — a just-shipped feature, a risky change, or a substrate you're about to build on. Use to complement your own Claude subagent audits with a genuinely different model that has different blind spots. A separate model catches what same-model reviewers miss.
 user-invocable: true
 allowed-tools: Bash, Read, Write, Glob, Grep, Agent
 ---
 
 # Codex Second Opinion
 
-Run a **separate model** (Codex CLI, `gpt-5.5`) as an independent reviewer of code in this repo, then reconcile its findings against your own. The value is *model diversity*: in practice Codex has surfaced real bugs that three parallel Claude subagent audits all missed (e.g. a process-layer async-timing bug that made a feature silently inert in production) — because a different model has different blind spots. Use it *with* your Claude audits, not instead of them.
+Run a **separate model** (Codex CLI — OpenAI's GPT coding models) as an independent reviewer of code in this repo, then reconcile its findings against your own. The value is *model diversity*: in practice Codex has surfaced real bugs that three parallel Claude subagent audits all missed (e.g. a process-layer async-timing bug that made a feature silently inert in production) — because a different model has different blind spots. Use it *with* your Claude audits, not instead of them.
 
 ## When to use
 
@@ -21,6 +21,15 @@ Don't reach for it for trivial/mechanical changes — it's a heavyweight `xhigh`
 ## Prerequisite
 
 Codex CLI must be installed: `which codex` (this repo has had `codex-cli` ≥ 0.137). If absent, say so and fall back to Claude-only subagent audits.
+
+**Model tier:** the run uses the CLI's configured default (`model` in
+`~/.codex/config.toml`). A second opinion wants the **flagship tier** —
+OpenAI's tier names (`sol` flagship / `terra` mid / `luna` speed) are durable
+across GPT generations, so check for the `-sol` suffix and override per-run if
+the default is a cheaper tier, e.g. `codex exec -m gpt-5.6-sol …`. Running the
+review on a speed tier quietly weakens the whole point of the cross-model
+check. (Executor-grade work is different — the `architect` skill routes that
+to mid/speed tiers deliberately.)
 
 ## The workflow
 

@@ -1,0 +1,7 @@
+{
+  "name": "architect",
+  "description": "Frontier-model-plans / cheap-model-executes delegation loop: decision-complete spec, cheap execution lanes (Claude subagent or Codex CLI), implementer/reviewer split, and claim-ladder acceptance (WRITTEN < RUNS < VERIFIED).",
+  "author": {
+    "name": "Nichalas Barnes"
+  }
+}

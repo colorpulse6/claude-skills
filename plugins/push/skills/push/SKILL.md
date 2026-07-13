@@ -35,10 +35,10 @@ Track elapsed time for each major step. Output a timing summary at the end.
 Run the preflight script to verify environment is ready.
 
 ```bash
-"$CLAUDE_PROJECT_DIR"/.claude/skills/push/scripts/preflight.sh
+"${CLAUDE_PLUGIN_ROOT}/skills/push/scripts/preflight.sh"
 ```
 
-(If running from a globally installed plugin, the path will be different - detect and use the correct location.)
+(If `$CLAUDE_PLUGIN_ROOT` is unset — running from a repo checkout rather than an installed plugin — use `<repo>/plugins/push/skills/push/scripts/preflight.sh`.)
 
 Checks:
 - gh CLI installed and authenticated
@@ -111,7 +111,7 @@ Available gates (run only if the script exists in package.json):
 
 Additionally, run the secret scanner regardless of project type:
 ```bash
-"$CLAUDE_PROJECT_DIR"/.claude/skills/push/scripts/secret-scan.sh
+"${CLAUDE_PLUGIN_ROOT}/skills/push/scripts/secret-scan.sh"
 ```
 
 Log each gate result as it completes:
