@@ -5,10 +5,15 @@ strong community plugins (Anthropic's `code-review`/`security-review`, superpowe
 claude-seo, wshobson/agents, and others). This is the substance Step 4 writes
 against.
 
+The invocation trade-off and completion criteria below are distilled from Matt
+Pocock's `writing-great-skills` (https://aihero.dev/skills-writing-great-skills).
+
 ## Contents
 - Frontmatter that matters
+- Invocation: who can fire this
 - Writing the description (the discovery surface)
 - Progressive disclosure
+- Steps and completion criteria
 - Subagents (when the skill fans out)
 - House conventions for THIS repo
 - Anti-pattern checklist (run at Step 5)
@@ -23,6 +28,33 @@ Required: `name`, `description`. This repo's skills also set `user-invocable`,
 - `allowed-tools`: scope to what the skill actually uses (e.g. `Bash, Read, Write,
   Glob, Grep, Agent`). Least privilege.
 - `argument-hint`: a short `[...]` hint for the invocation.
+
+## Invocation: who can fire this
+
+Decide this **before** writing the description — it changes what the description
+is for. Two options, each spending a different budget:
+
+- **Model-invoked** (default; omit `disable-model-invocation`). The agent can fire
+  it autonomously, and *other skills can reach it by name*. Cost: **context load** —
+  the description sits in the window every turn, whether or not the skill fires.
+- **User-invoked** (`disable-model-invocation: true`). Only the human, typing the
+  name, can invoke it; no other skill can reach it. Zero context load, but it
+  spends **cognitive load** — *you* become the index that has to remember it
+  exists. The `description` turns human-facing: a one-line summary, trigger lists
+  stripped.
+
+Pick model-invoked only when the agent must reach the skill on its own, or when
+another skill invokes it by name (check: does any `SKILL.md` reference `/<name>`?).
+A skill that only ever fires by hand should be user-invoked and pay nothing.
+
+Two consequences worth planning for:
+
+- **Collision control.** Two skills answering to the same word only actually
+  compete if both are model-invocable. Marking one user-invoked makes the clash
+  disappear without deleting either.
+- **Router skills.** When user-invoked skills multiply past what you can remember,
+  that piled-up cognitive load is cured by a **router**: one user-invoked skill
+  that names the others and says when to reach for each.
 
 ## Writing the description (the discovery surface)
 
@@ -56,6 +88,23 @@ Rules:
 - **Scripts are executed, not read** — say "Run `x.py`" (execute) vs "see `x.py`
   for the algorithm" (read). Prefer execution; it's reliable and token-cheap.
 
+## Steps and completion criteria
+
+Every numbered step ends on a **completion criterion** — the condition that tells
+the agent the step is done. Two properties:
+
+- **Checkable** — the agent can tell done from not-done without guessing.
+- **Exhaustive where it matters** — "every changed file accounted for", not
+  "produce a list of changes". A vague criterion invites **premature completion**:
+  the agent does three of nine units and reports success.
+
+Bad: "Review the diff for issues."
+Good: "Every file in `git diff --name-only <base>...HEAD` appears in the findings
+table or in the explicitly-skipped list, with a reason."
+
+This binds flat reference skills too — "every rule applied" is as good a criterion
+as "every step done".
+
 ## Subagents (when the skill fans out)
 
 - **One focused job per agent**; a detailed system prompt; a `description` Claude
@@ -88,6 +137,10 @@ Rules:
 Flag and fix any of these in the new skill:
 
 - [ ] Vague description, or first/second-person, or missing trigger phrases.
+- [ ] Invocation never chosen: model-invocable by default when nothing (no user,
+      no other skill) needs the agent to reach it on its own — paying context
+      load for nothing.
+- [ ] A step with no completion criterion, or one too vague to check.
 - [ ] `SKILL.md` over ~500 lines, or over-explains things Claude already knows.
 - [ ] A reference nested more than one level deep, or a >100-line reference with
       no `## Contents` TOC.
