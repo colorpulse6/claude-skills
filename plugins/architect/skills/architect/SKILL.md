@@ -90,6 +90,13 @@ Tied on the table ⇒ the provider dispatched to less this session (see the
 balance rule in `references/spec-contract.md`; the tiebreak inverts under API
 billing).
 
+These rows are **directional, not measured** — secondary benchmark reports on
+the previous model generation, with provenance marked per row in
+`references/spec-contract.md`. The terminal-native row has the widest margin
+and the most confidence; "planning → Claude" is the weakest, an inherited
+assumption no source was found for. Evidence from your own runs outranks this
+table the moment you have any.
+
 **2. Tier and invocation:**
 
 | Weight | Claude | Codex |

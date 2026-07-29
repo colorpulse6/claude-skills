@@ -54,26 +54,57 @@ dispatch consults it and a pointer is not reliable enough for a hot path. This
 section is the *why* behind each row — read it when a routing call is contested,
 not on every dispatch. Do not duplicate the table here; it drifts.
 
-- **Planning, spec-writing, premise rejection → Claude.** Wins decisively on
-  decision quality and edge-case discovery; the thesis this whole skill rests on.
-- **Multi-file / dependency-graph work → Claude.** The 1M window holds the
-  graph. The practitioner heuristic is "12 files and the dependency graph
-  matters."
-- **Large real-repo tasks → Claude.** SWE-bench Pro 69.2% vs 58.6%.
-- **Code a human will maintain → Claude.** Blind evaluation rated Claude's
-  output cleaner in 67% of comparisons vs 25%, 8% ties.
-- **Terminal-native work → Codex.** 77.3% vs 65.4% — a 12-point gap, the
-  largest single divergence between the families.
-- **Algorithmic / self-contained problems → Codex.** Leads LiveCodeBench and
-  Terminal-Bench.
-- **High-volume mechanical transforms → Codex `luna`.** ~4× fewer tokens for
-  the same work.
-- **Review → the family that didn't write it.** Different blind spots is the
-  entire value; a same-family reviewer shares the author's errors.
+**Provenance is marked per row, because the table's formatting flatters its
+sourcing.** `[reported]` = a figure from secondary practitioner/comparison
+write-ups, not chased to a primary benchmark. `[assumed]` = convention, no
+evidence gathered. Nothing here is `[measured]` by us. Treat a `[reported]`
+margin as directional and an `[assumed]` row as a starting guess.
+
+- **Multi-file / dependency-graph work → Claude.** `[reported]` The 1M window
+  holds the graph; the practitioner heuristic is "12 files and the dependency
+  graph matters."
+- **Large real-repo tasks → Claude.** `[reported]` SWE-bench Pro 69.2% vs
+  58.6%.
+- **Code a human will maintain → Claude.** `[reported]` Blind evaluation rated
+  Claude's output cleaner in 67% of comparisons vs 25%, 8% ties.
+- **Terminal-native work → Codex.** `[reported]` 77.3% vs 65.4% — a 12-point
+  gap, the largest single divergence between the families, and the row that
+  survives the most measurement noise.
+- **Algorithmic / self-contained problems → Codex.** `[reported]` Leads
+  LiveCodeBench and Terminal-Bench; no margin recorded.
+- **High-volume mechanical transforms → Codex `luna`.** `[reported]` ~4× fewer
+  tokens for the same work; the speed tier is priced for volume. The mapping of
+  *task weight* to tier is `[assumed]` on top of that.
+- **Review → the family that didn't write it.** `[reported]` for the industry
+  hybrid; the mechanism (different blind spots) has exactly one local
+  observation behind it — a single two-slice run where the two reviewers
+  returned findings different in kind (an argument-validation footgun vs a
+  Unicode character-class hole). n=1 is an anecdote, not evidence.
+- **Claude `haiku` mechanical / `opus` hard.** `[assumed]` Tier-matching by
+  convention. No benchmark gathered for either.
+
+**Two caveats that apply to every row above.** The figures come from secondary
+comparison write-ups rather than primary leaderboards or model cards. And they
+were measured on the *previous* generation pair — Opus 4.8 / GPT-5.5 — then
+applied here to Opus 5 / GPT-5.6. Direction is defensible; precision is not.
+
+**What the tier split rests on, separately from family.** That a frontier model
+should plan while a cheaper one executes is `[reported]` and reasonably
+corroborated: per-workflow cost drops 50–70% with no quality loss, one worked
+example landing at $25.55 against $81 for all-frontier. Note this supports the
+*tier* claim only. That **Claude** specifically plans better than **Codex** is
+`[assumed]` — the original founding line cited no study, and searching did not
+produce one. If a routing call turns on that assumption, treat it as open.
 
 The industry hybrid this converges on — *Claude generates, Codex reviews* — is
 the default here too. Invert it when the work is terminal-native: Codex builds
 the migration script, Claude reviews it against the schema it has in context.
+
+**The cheapest way to replace all of this with real evidence** is the skill's
+own output. Every run emits a balance ledger and per-slice review verdicts.
+Twenty runs of "which family built this slice, and did the cross-family
+reviewer find anything" is direct evidence about *this* codebase — which is the
+only thing a published benchmark cannot tell you.
 
 ## Lane table
 
