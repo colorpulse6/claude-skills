@@ -96,11 +96,25 @@ billing).
 |---|---|---|
 | Mechanical | `haiku` | `codex exec -m gpt-5.6-luna --sandbox workspace-write "$(cat .architect/spec-<slug>.md)" < /dev/null` |
 | Ordinary | `sonnet` | `codex exec -m gpt-5.6-terra --sandbox workspace-write "$(cat .architect/spec-<slug>.md)" < /dev/null` |
+| Hard (escalation) | `opus` | `codex exec -m gpt-5.6-sol --sandbox workspace-write "$(cat .architect/spec-<slug>.md)" < /dev/null` |
 | Review | fresh-context subagent | `codex exec -m gpt-5.6-sol --sandbox read-only "$(cat .architect/review-<slice>.md)" < /dev/null` |
 
 `<slug>` is the spec you wrote in Step 1; `<slice>` is the reviewer brief you
 write in Step 3. These are the canonical paths this skill creates — substitute
 the real names, and do not invent a bare `spec.md`, which nothing produces.
+
+Note the two `sol` rows differ only in sandbox: **`workspace-write` to build,
+`read-only` to review.** A reviewer that can edit is not a reviewer.
+
+**Escalation is deliberate, never a default.** The whole thesis is that
+flagship tokens buy judgment, not typing — so reach for the hard row only
+when: the ordinary lane returned `FAILED` with evidence the slice exceeded it,
+or the slice is known upfront to need frontier reasoning *during*
+implementation (a subtle migration, an algorithm the spec can only describe).
+A slice that merely has many files is not hard; that is ordinary work, and
+`terra`/`sonnet` handle it. State the escalation and its trigger in the report
+— an unexplained flagship executor is the cost failure this skill exists to
+prevent.
 
 Codex model ids are generation-qualified — the bare tier name (`terra`)
 returns a 400. `< /dev/null` is mandatory or the stdin probe hangs. Full lane

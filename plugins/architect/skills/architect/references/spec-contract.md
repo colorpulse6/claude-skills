@@ -82,7 +82,8 @@ the migration script, Claude reviews it against the schema it has in context.
 | Cheap Claude subagent | Agent tool, `model: sonnet` (or `haiku` for mechanical transforms) | Default executor lane for in-repo code | Runs in-harness, tools available, background-able |
 | Codex CLI executor | `codex exec -m gpt-5.6-terra --sandbox workspace-write "$(cat spec.md)" < /dev/null` | Terminal-native work; second family wanted; Claude cap under pressure | `< /dev/null` mandatory on non-TTY/backgrounded runs — the stdin probe otherwise blocks forever |
 | Codex volume | `codex exec -m gpt-5.6-luna --sandbox workspace-write ... < /dev/null` | Mechanical transforms, high-volume edits | Cheapest tier; do not hand it judgment |
-| Codex read-only | `codex exec -m gpt-5.6-sol --sandbox read-only ... < /dev/null` | Reviewer lane (cross-family) | Read-only sandbox; strongest reviewer diversity |
+| Codex flagship executor | `codex exec -m gpt-5.6-sol --sandbox workspace-write ... < /dev/null` | Escalation only: the ordinary lane returned `FAILED`, or the slice needs frontier reasoning *during* implementation | Flagship rates for typing — against the thesis, so it must be justified in the report |
+| Codex read-only | `codex exec -m gpt-5.6-sol --sandbox read-only ... < /dev/null` | Reviewer lane (cross-family) | Read-only sandbox; strongest reviewer diversity. Same model as the row above — only the sandbox differs, and a reviewer that can edit is not a reviewer |
 | Inline (self) | Just do it | No lanes available; task below threshold | Keep spec + ladder discipline anyway |
 
 **Model ids must be generation-qualified.** Pass the full id — `gpt-5.6-sol`,
