@@ -3,7 +3,9 @@
 ## Contents
 - The five-part spec contract
 - Decision-completeness checklist
+- Provider strengths — which family for which work
 - Lane table
+- Balancing the two subscriptions
 - Executor dispatch template
 - Reviewer brief template
 
@@ -40,24 +42,104 @@ Run before dispatch; any "no" means the spec isn't ready:
       (Answer is always: return `BLOCKED`, never improvise.)
 - [ ] Are the done-criteria commands runnable in the executor's environment?
 
+## Provider strengths — which family for which work
+
+Cost tier answers *how much model*. This answers *which family*. Route on both:
+a cheap lane in the wrong family is a false economy.
+
+| Work | Family | Why |
+|---|---|---|
+| Planning, spec-writing, premise rejection | **Claude** (flagship) | Wins decisively on decision quality and edge-case discovery — the thesis this whole skill rests on |
+| Multi-file changes where the dependency graph matters | **Claude** | The 1M window holds the graph; the practitioner heuristic is "12 files and the dependency graph matters" |
+| Large real-repo tasks | **Claude** | SWE-bench Pro 69.2% vs 58.6% |
+| Code a human will read and maintain | **Claude** | Blind evaluation rated Claude's output cleaner in 67% of comparisons vs 25% (8% ties) |
+| Terminal-native work — scripts, sysadmin, CI/CD, migrations | **Codex** | 77.3% vs 65.4%, a 12-point gap; the largest single divergence between the families |
+| Algorithmic / self-contained problems | **Codex** | Leads LiveCodeBench and Terminal-Bench |
+| High-volume mechanical transforms | **Codex** (`luna`) | ~4× fewer tokens for the same work; speed tier is built for it |
+| Adversarial review of anything | **The family that didn't write it** | Different blind spots is the entire value; a same-family reviewer shares the author's errors |
+
+The industry hybrid this converges on — *Claude generates, Codex reviews* — is
+the default here too. Invert it when the work is terminal-native: Codex builds
+the migration script, Claude reviews it against the schema it has in context.
+
 ## Lane table
 
-| Lane | How | Use when | Cost/notes |
+| Lane | How | Use when | Notes |
 |---|---|---|---|
-| Cheap Claude subagent | Agent tool, `model: sonnet` (or `haiku` for mechanical transforms) | Default executor lane | Runs in-harness, tools available, background-able |
-| Codex CLI executor | `codex exec -m <mid-or-speed tier> --sandbox workspace-write "$(cat spec.md)" < /dev/null` | Second model family wanted as executor; Claude capacity constrained | The `< /dev/null` is mandatory on non-TTY/backgrounded runs — stdin probe otherwise blocks forever |
-| Codex read-only | `codex exec -m <flagship tier> --sandbox read-only ... < /dev/null` | Reviewer lane (cross-model) | Read-only sandbox; strongest reviewer diversity |
+| Cheap Claude subagent | Agent tool, `model: sonnet` (or `haiku` for mechanical transforms) | Default executor lane for in-repo code | Runs in-harness, tools available, background-able |
+| Codex CLI executor | `codex exec -m gpt-5.6-terra --sandbox workspace-write "$(cat spec.md)" < /dev/null` | Terminal-native work; second family wanted; Claude cap under pressure | `< /dev/null` mandatory on non-TTY/backgrounded runs — the stdin probe otherwise blocks forever |
+| Codex volume | `codex exec -m gpt-5.6-luna --sandbox workspace-write ... < /dev/null` | Mechanical transforms, high-volume edits | Cheapest tier; do not hand it judgment |
+| Codex read-only | `codex exec -m gpt-5.6-sol --sandbox read-only ... < /dev/null` | Reviewer lane (cross-family) | Read-only sandbox; strongest reviewer diversity |
 | Inline (self) | Just do it | No lanes available; task below threshold | Keep spec + ladder discipline anyway |
 
-**Codex tiers:** OpenAI's tier names are durable across GPT generations —
-`sol` (flagship), `terra` (mid, execution-competitive with the previous
-generation's flagship at roughly half the cost), `luna` (speed, for mechanical
-transforms). That maps exactly onto this skill's thesis: **executor lanes take
-`terra`/`luna`, the reviewer lane takes `sol`.** Don't rely on the CLI's
-configured default for lane choice — the user's default may be flagship-tier
-(expensive for an executor) or speed-tier (weak for a reviewer); pass `-m`
-explicitly per lane, using whatever the current generation of each tier is
-(check `codex --version` / config if unsure).
+**Model ids must be generation-qualified.** Pass the full id — `gpt-5.6-sol`,
+`gpt-5.6-terra`, `gpt-5.6-luna`. The bare tier name is **not** accepted:
+
+```
+$ codex exec -m terra ...
+warning: Model metadata for `terra` not found. Defaulting to fallback metadata
+ERROR: 400 The 'terra' model is not supported when using Codex with a ChatGPT account.
+
+$ codex exec -m gpt-5.6-terra ...
+OK
+```
+
+Tiers are stable in *meaning* across generations — `sol` flagship, `terra` the
+value default (flagship-minus at roughly half cost; 87.4% vs 88.8% on
+Terminal-Bench 2.1), `luna` the speed tier — but the id carries the generation.
+When a new generation ships, the prefix moves and these ids go stale: read
+`model` in `~/.codex/config.toml` to see the current generation, then swap the
+tier suffix for the lane you want.
+
+Never inherit the CLI's configured default for lane choice — it is whatever the
+user set for interactive work (often flagship, which is wasteful for an
+executor). Pass `-m` explicitly on every lane.
+
+Outside a git repo, `codex exec` refuses with *"Not inside a trusted directory"*
+— add `--skip-git-repo-check` when dispatching into scratch directories.
+
+Lane unavailable ⇒ report `LANE UNAVAILABLE: <which>` and pick the next lane
+openly. Never silently substitute a different model and present its work as
+the requested lane's.
+
+## Balancing the two providers
+
+**First, establish the metering regime — don't assume it.** It changes what the
+second lane actually costs, and it varies by installation:
+
+| Signal | Regime | Scarce resource |
+|---|---|---|
+| Codex errors mention *"with a ChatGPT account"*; `~/.codex/auth.json` holds a ChatGPT login | Subscription | Rolling-window **headroom** |
+| An `OPENAI_API_KEY` is set, or config points at an API key | API-billed | **Dollars** per token |
+| Claude Code running on a Max/Pro plan | Subscription | Rolling-window headroom |
+| Claude Code on a console/API key | API-billed | Dollars per token |
+
+Unknown after a quick check? Assume subscription for whichever side is
+ambiguous and say so in the report — over-conserving headroom is the cheaper
+error.
+
+**Under subscription metering**, idle capacity is wasted capacity: a run that
+puts everything through one family burns that cap toward its limit while the
+other sits unused. When two lanes are genuinely tied on the strengths table,
+take the one used less this session.
+
+**Under API billing**, the tiebreak inverts — prefer the cheaper lane rather
+than the less-used one, since there is no cap to conserve and no reason to pay
+more for a tie.
+
+**In both regimes, strength outranks balance.** Never route terminal-native
+work to Claude, or dependency-graph work to Codex, to even out a ledger. A task
+done worse on the "fairer" lane costs more rework than it saves in headroom or
+dollars.
+
+Track it cheaply: keep a running tally of dispatches per family and report it
+at Step 5 as `Claude <n> · Codex <n>`. Exact token accounting is not the goal
+and is not comparable across providers anyway — the tally exists to make a
+lopsided run visible, so the next run can lean the other way.
+
+If one provider is rate-limited or out of quota mid-run, that is a
+`LANE UNAVAILABLE` — say so, re-route by the strengths table, and note in the
+report that the lane choice was forced rather than chosen.
 
 Lane unavailable ⇒ report `LANE UNAVAILABLE: <which>` and pick the next lane
 openly. Never silently substitute a different model and present its work as

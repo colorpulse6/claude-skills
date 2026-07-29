@@ -55,8 +55,15 @@ Use the decision rubric in `patterns.md`. The short version:
 - Add a **script** whenever there's deterministic mechanical work.
 - Add **`references/`** for any lookup tables / checklists / knowledge.
 
-State the chosen shape and *why* (one line). Don't reach for agents by reflex —
-the overhead isn't free.
+Then pick **who can fire it** (see *Invocation* in `authoring-guide.md`):
+
+- **User-invoked** (`disable-model-invocation: true`) — the default for anything
+  the human always triggers by hand. Costs zero context.
+- **Model-invoked** — only when the agent must reach it autonomously, or another
+  skill invokes it by name.
+
+State the chosen shape and invocation, each with *why* (one line each). Don't
+reach for agents by reflex — the overhead isn't free.
 
 ## Step 3: Scaffold
 
@@ -75,6 +82,8 @@ Open `authoring-guide.md` and write the skill against it. Non-negotiables:
 
 - **Description** = third-person/imperative *what it does* + *when to use it* +
   literal trigger phrases. This is the discovery surface — invest here first.
+- **Every step ends on a checkable completion criterion** — "every changed file
+  accounted for", not "produce a list". Vague criteria invite premature completion.
 - **`SKILL.md` stays a thin spine** (< 500 lines): numbered steps, an output
   contract, an error-handling table. Push detail into `references/` (one level
   deep; any reference > 100 lines opens with a `## Contents` TOC).
