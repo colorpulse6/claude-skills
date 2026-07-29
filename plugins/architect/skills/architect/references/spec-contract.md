@@ -40,7 +40,12 @@ Run before dispatch; any "no" means the spec isn't ready:
 - [ ] Are edge cases enumerated with expected behavior, not left to taste?
 - [ ] Does the executor know what to do when reality contradicts the spec?
       (Answer is always: return `BLOCKED`, never improvise.)
-- [ ] Are the done-criteria commands runnable in the executor's environment?
+- [ ] Have you **executed** each done-criteria command's tooling probe —
+      `pytest --version`, `tsc --version`, `curl --version` — and seen it
+      resolve? Check that the command *can run*, not that it passes: the
+      criteria should still fail at this point, because the work doesn't
+      exist yet. A passive "looks runnable" is how a missing test runner
+      reaches the executor.
 
 ## Provider strengths — which family for which work
 
