@@ -28,9 +28,12 @@ family answers *which model*. The families diverge sharply by task type —
 Claude leads on long-context multi-file work and code quality, Codex leads on
 terminal-native work by a 12-point margin — so a cheap lane in the wrong family
 is a false economy. What the second lane *costs* depends on how each provider
-is billed, which varies by installation; `references/spec-contract.md` holds
-the strengths table and the balance rule, including how to tell which regime
-you're in.
+is billed, which varies by installation.
+
+**The routing tables are inline in Step 2** — that is the single source of
+truth for which family and which tier. `references/spec-contract.md` holds the
+evidence behind each row, the metering-detection table, and the balance rule;
+reach for it when a routing call is contested, not to make a routine one.
 
 Four rules that make it work, the first three inherited from systems that ran
 this at scale:
@@ -66,15 +69,67 @@ execute this?"*
 
 ## Step 2: Dispatch the executor
 
-Pick the lane in two moves, using `references/spec-contract.md`:
+Pick the lane in two moves. **Both tables are here, inline, because every
+dispatch consults them** — do not dispatch from memory of what a family is
+"probably" good at.
 
-1. **Family, from the strengths table.** Terminal-native work (scripts, CI,
-   migrations, sysadmin) → Codex. Multi-file changes where the dependency
-   graph matters, or code a human will maintain → Claude. Tied → the provider
-   you've dispatched to less this session.
-2. **Tier, from the lane table.** Mechanical → `haiku` / `gpt-5.6-luna`.
-   Ordinary implementation → `sonnet` / `gpt-5.6-terra`. Codex model ids are
-   generation-qualified; the bare tier name returns a 400.
+**1. Family — from strengths:**
+
+| Work | Family |
+|---|---|
+| Planning, spec-writing, premise rejection | Claude |
+| Multi-file changes where the dependency graph matters | Claude |
+| Large real-repo tasks | Claude |
+| Code a human will read and maintain | Claude |
+| Terminal-native — scripts, sysadmin, CI/CD, migrations | **Codex** |
+| Algorithmic / self-contained problems | **Codex** |
+| High-volume mechanical transforms | **Codex** |
+| Reviewing anything | whichever family did **not** write it |
+
+Tied on the table ⇒ the provider dispatched to less this session (see the
+balance rule in `references/spec-contract.md`; the tiebreak inverts under API
+billing).
+
+These rows are **directional, not measured** — secondary benchmark reports on
+the previous model generation, with provenance marked per row in
+`references/spec-contract.md`. The terminal-native row has the widest margin
+and the most confidence; "planning → Claude" is the weakest, an inherited
+assumption no source was found for. Evidence from your own runs outranks this
+table the moment you have any.
+
+**2. Tier and invocation:**
+
+| Weight | Claude | Codex |
+|---|---|---|
+| Mechanical | `haiku` | `codex exec -m gpt-5.6-luna --sandbox workspace-write "$(cat ".architect/spec-<slug>.md")" < /dev/null` |
+| Ordinary | `sonnet` | `codex exec -m gpt-5.6-terra --sandbox workspace-write "$(cat ".architect/spec-<slug>.md")" < /dev/null` |
+| Hard (escalation) | `opus` | `codex exec -m gpt-5.6-sol --sandbox workspace-write "$(cat ".architect/spec-<slug>.md")" < /dev/null` |
+| Review | fresh-context subagent | `codex exec -m gpt-5.6-sol --sandbox read-only "$(cat ".architect/review-<slice>.md")" < /dev/null` |
+
+`<slug>` is the spec you wrote in Step 1; `<slice>` is the reviewer brief you
+write in Step 3. These are the canonical paths this skill creates — substitute
+the real names, and do not invent a bare `spec.md`, which nothing produces.
+
+Note the two `sol` rows differ only in sandbox: **`workspace-write` to build,
+`read-only` to review.** A reviewer that can edit is not a reviewer.
+
+**Escalation is deliberate, never a default.** The whole thesis is that
+flagship tokens buy judgment, not typing — so reach for the hard row only
+when: the ordinary lane returned `FAILED` with evidence the slice exceeded it,
+or the slice is known upfront to need frontier reasoning *during*
+implementation (a subtle migration, an algorithm the spec can only describe).
+A slice that merely has many files is not hard; that is ordinary work, and
+`terra`/`sonnet` handle it. State the escalation and its trigger in the report
+— an unexplained flagship executor is the cost failure this skill exists to
+prevent.
+
+Codex model ids are generation-qualified — the bare tier name (`terra`)
+returns a 400. `< /dev/null` is mandatory or the stdin probe hangs. Full lane
+table, failure modes, and metering detection: `references/spec-contract.md`.
+
+**If this run dispatches only one family, say why in the report.** A run that
+silently routes everything to the harness's default model has not routed at
+all — that is the failure this step exists to prevent.
 
 State the chosen lane and the axis that decided it, in one line, before
 dispatching. The executor receives the spec file content and NOTHING else —
@@ -88,7 +143,9 @@ should go to different families by the same rule — that is the cheapest
 balancing there is, since it costs nothing in quality.
 
 **Completion criterion:** every slice in the spec has been dispatched to a
-named lane, or explicitly recorded as executed inline — none left implicit.
+named lane — family and tier both stated, with the table row that decided the
+family — or explicitly recorded as executed inline. None left implicit, and no
+slice dispatched without naming its family first.
 
 ## Step 3: Adversarial review (fresh context)
 
@@ -110,7 +167,7 @@ contract).
 
 - Claude wrote the slice → fresh-context Claude is the floor; prefer Codex:
   ```bash
-  codex exec -m gpt-5.6-sol --sandbox read-only "$(cat .architect/review-<slice>.md)" < /dev/null
+  codex exec -m gpt-5.6-sol --sandbox read-only "$(cat ".architect/review-<slice>.md")" < /dev/null
   ```
   where `review-<slice>.md` is the reviewer brief from
   `references/spec-contract.md` with the spec section and that slice's diff

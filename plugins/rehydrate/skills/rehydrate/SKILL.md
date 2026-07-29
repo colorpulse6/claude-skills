@@ -19,8 +19,10 @@ Bring a returning human (or a fresh agent) back to full context on a project —
 | Pack | Covers |
 |---|---|
 | `projects-atlas.md` | Every personal repo: state, next thread, paths (the index) |
-| `kyra-return.md` | Day-one-back briefing for the Kyra work monorepo |
 | `marketing-map.md` | The ~/Marketing content engine: schedules, queues, operator rules |
+
+The atlas is the authority, not this table — packs are discovered by reading it,
+so work-specific and private packs need no entry here and should not get one.
 
 (Adapting this skill for another machine: change the pack directory; the protocol is unchanged.)
 
