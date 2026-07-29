@@ -101,10 +101,10 @@ table the moment you have any.
 
 | Weight | Claude | Codex |
 |---|---|---|
-| Mechanical | `haiku` | `codex exec -m gpt-5.6-luna --sandbox workspace-write "$(cat .architect/spec-<slug>.md)" < /dev/null` |
-| Ordinary | `sonnet` | `codex exec -m gpt-5.6-terra --sandbox workspace-write "$(cat .architect/spec-<slug>.md)" < /dev/null` |
-| Hard (escalation) | `opus` | `codex exec -m gpt-5.6-sol --sandbox workspace-write "$(cat .architect/spec-<slug>.md)" < /dev/null` |
-| Review | fresh-context subagent | `codex exec -m gpt-5.6-sol --sandbox read-only "$(cat .architect/review-<slice>.md)" < /dev/null` |
+| Mechanical | `haiku` | `codex exec -m gpt-5.6-luna --sandbox workspace-write "$(cat ".architect/spec-<slug>.md")" < /dev/null` |
+| Ordinary | `sonnet` | `codex exec -m gpt-5.6-terra --sandbox workspace-write "$(cat ".architect/spec-<slug>.md")" < /dev/null` |
+| Hard (escalation) | `opus` | `codex exec -m gpt-5.6-sol --sandbox workspace-write "$(cat ".architect/spec-<slug>.md")" < /dev/null` |
+| Review | fresh-context subagent | `codex exec -m gpt-5.6-sol --sandbox read-only "$(cat ".architect/review-<slice>.md")" < /dev/null` |
 
 `<slug>` is the spec you wrote in Step 1; `<slice>` is the reviewer brief you
 write in Step 3. These are the canonical paths this skill creates — substitute
@@ -167,7 +167,7 @@ contract).
 
 - Claude wrote the slice → fresh-context Claude is the floor; prefer Codex:
   ```bash
-  codex exec -m gpt-5.6-sol --sandbox read-only "$(cat .architect/review-<slice>.md)" < /dev/null
+  codex exec -m gpt-5.6-sol --sandbox read-only "$(cat ".architect/review-<slice>.md")" < /dev/null
   ```
   where `review-<slice>.md` is the reviewer brief from
   `references/spec-contract.md` with the spec section and that slice's diff
