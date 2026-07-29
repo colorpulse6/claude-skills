@@ -5,12 +5,11 @@ description: >-
   Claude and Codex. The expensive model writes a decision-complete spec, then
   routes each slice by model family strength (Claude for long-context
   multi-file work, Codex for terminal-native work) and cost tier, enforces a
-  cross-family implementer/reviewer split, balances load across the two
-  subscriptions, and accepts work only by verified evidence — spending
-  frontier tokens on judgment, not typing. Use when the user says "architect
-  this", "spec it and delegate", "plan expensive execute cheap", "split this
-  across Claude and Codex", "use both providers", or invokes /architect
-  <task>.
+  cross-family implementer/reviewer split, balances load across providers, and
+  accepts work only by verified evidence — spending frontier tokens on
+  judgment, not typing. Use when the user says "architect this", "spec it and
+  delegate", "plan expensive execute cheap", "split this across Claude and
+  Codex", "use both providers", or invokes /architect <task>.
 user-invocable: true
 argument-hint: "[the task to architect and delegate]"
 allowed-tools: Bash, Read, Write, Glob, Grep, Agent
@@ -28,9 +27,10 @@ Routing runs on **two axes, not one**. Cost tier answers *how much model*;
 family answers *which model*. The families diverge sharply by task type —
 Claude leads on long-context multi-file work and code quality, Codex leads on
 terminal-native work by a 12-point margin — so a cheap lane in the wrong family
-is a false economy. Both are subscription-metered here, which makes provider
-**headroom**, not dollars, the resource actually being spent. See
-`references/spec-contract.md` for the strengths table and the balance rule.
+is a false economy. What the second lane *costs* depends on how each provider
+is billed, which varies by installation; `references/spec-contract.md` holds
+the strengths table and the balance rule, including how to tell which regime
+you're in.
 
 Four rules that make it work, the first three inherited from systems that ran
 this at scale:
@@ -96,17 +96,39 @@ Spawn a reviewer that gets the **spec + the diff only** — never the
 implementer's notes or self-assessment. Brief it to falsify: "find where this
 violates the spec or breaks," not "approve this."
 
-**The reviewer is always the family that did not write the code.** Different
-blind spots is the whole value; a same-family reviewer shares the author's
-errors. Claude built it → `codex exec -m gpt-5.6-sol --sandbox read-only`.
-Codex built it → a fresh-context Claude subagent. A same-family fresh context
-is the floor, used only when the other provider is unavailable — and say so
-when that happens.
+**The reviewer is always the family that did not write the code** — different
+blind spots is the whole value, and a same-family reviewer shares the author's
+errors.
 
-This also balances the ledger for free: whichever family executed, the other
-one reviews.
+**Review per slice, not per diff.** When slices went to different families,
+one reviewer cannot satisfy the invariant for the whole change — neither
+family is foreign to all of it. Review each slice with the family that did not
+write *that* slice, in parallel. Only slices sharing an author can share a
+reviewer. When a slice's boundaries are unclear in the combined diff, pass the
+reviewer the paths that slice owns (they're already named in the spec's output
+contract).
 
-For consequential changes, run two reviewers and reconcile by convergence.
+- Claude wrote the slice → fresh-context Claude is the floor; prefer Codex:
+  ```bash
+  codex exec -m gpt-5.6-sol --sandbox read-only "$(cat .architect/review-<slice>.md)" < /dev/null
+  ```
+  where `review-<slice>.md` is the reviewer brief from
+  `references/spec-contract.md` with the spec section and that slice's diff
+  inlined — the reviewer gets no other context, and the `< /dev/null` is
+  mandatory or the stdin probe hangs.
+- Codex wrote the slice → a fresh-context Claude subagent, same brief.
+
+Same-family review is the floor, used only when the other provider is
+unavailable — say so explicitly when it happens.
+
+This also balances the ledger for free: whichever family executed a slice, the
+other one reviews it.
+
+For consequential changes, run two reviewers per slice and reconcile by
+convergence.
+
+**Completion criterion:** every slice has a review verdict from a family that
+did not author it, or a recorded reason why that was impossible.
 
 ## Step 4: Accept by the claim ladder
 
@@ -136,9 +158,10 @@ lanes: Claude 3 (opus plan, sonnet ×2 impl) · Codex 2 (terra migration, sol re
 
 Its job is to make a lopsided run visible so the next one can lean the other
 way. Do not attempt token or dollar accounting — the two providers don't
-report comparably, and both are subscription-metered here, so the count is the
-signal. If any lane was forced (rate limit, missing CLI) rather than chosen,
-mark it in the ledger.
+report comparably, so the count is the signal. Name the metering regime you
+determined (see `references/spec-contract.md`), since it decides which way
+"lean the other way" points. If any lane was forced (rate limit, quota,
+missing CLI) rather than chosen, mark it in the ledger.
 
 ## Error handling
 

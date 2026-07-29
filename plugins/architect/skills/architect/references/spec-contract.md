@@ -102,31 +102,44 @@ Lane unavailable ⇒ report `LANE UNAVAILABLE: <which>` and pick the next lane
 openly. Never silently substitute a different model and present its work as
 the requested lane's.
 
-## Balancing the two subscriptions
+## Balancing the two providers
 
-Both lanes are **subscription-metered, not per-token billed** — a Claude Max
-plan and a ChatGPT plan, each with its own rolling cap. The scarce resource is
-therefore *headroom on the provider you will need later*, not dollars.
+**First, establish the metering regime — don't assume it.** It changes what the
+second lane actually costs, and it varies by installation:
 
-Two consequences for lane choice:
+| Signal | Regime | Scarce resource |
+|---|---|---|
+| Codex errors mention *"with a ChatGPT account"*; `~/.codex/auth.json` holds a ChatGPT login | Subscription | Rolling-window **headroom** |
+| An `OPENAI_API_KEY` is set, or config points at an API key | API-billed | **Dollars** per token |
+| Claude Code running on a Max/Pro plan | Subscription | Rolling-window headroom |
+| Claude Code on a console/API key | API-billed | Dollars per token |
 
-- **Idle capacity is wasted capacity.** A run that puts everything through one
-  family burns that cap toward its limit while the other sits unused. When two
-  lanes are genuinely tied on the strengths table, take the one you've used
-  less this session.
-- **Strength still outranks balance.** Never route terminal-native work to
-  Claude, or dependency-graph work to Codex, to even out a ledger. Balance is
-  the tiebreak, not the criterion — a task done worse on the "fairer" lane
-  costs more rework than it saves headroom.
+Unknown after a quick check? Assume subscription for whichever side is
+ambiguous and say so in the report — over-conserving headroom is the cheaper
+error.
+
+**Under subscription metering**, idle capacity is wasted capacity: a run that
+puts everything through one family burns that cap toward its limit while the
+other sits unused. When two lanes are genuinely tied on the strengths table,
+take the one used less this session.
+
+**Under API billing**, the tiebreak inverts — prefer the cheaper lane rather
+than the less-used one, since there is no cap to conserve and no reason to pay
+more for a tie.
+
+**In both regimes, strength outranks balance.** Never route terminal-native
+work to Claude, or dependency-graph work to Codex, to even out a ledger. A task
+done worse on the "fairer" lane costs more rework than it saves in headroom or
+dollars.
 
 Track it cheaply: keep a running tally of dispatches per family and report it
 at Step 5 as `Claude <n> · Codex <n>`. Exact token accounting is not the goal
-and is not available across both providers anyway — the tally exists to make a
+and is not comparable across providers anyway — the tally exists to make a
 lopsided run visible, so the next run can lean the other way.
 
-If one provider is rate-limited mid-run, that is a `LANE UNAVAILABLE` — say so,
-re-route by the strengths table, and note in the report that the lane choice
-was forced rather than chosen.
+If one provider is rate-limited or out of quota mid-run, that is a
+`LANE UNAVAILABLE` — say so, re-route by the strengths table, and note in the
+report that the lane choice was forced rather than chosen.
 
 Lane unavailable ⇒ report `LANE UNAVAILABLE: <which>` and pick the next lane
 openly. Never silently substitute a different model and present its work as
