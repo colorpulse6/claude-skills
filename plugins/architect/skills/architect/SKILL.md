@@ -66,15 +66,42 @@ execute this?"*
 
 ## Step 2: Dispatch the executor
 
-Pick the lane in two moves, using `references/spec-contract.md`:
+Pick the lane in two moves. **Both tables are here, inline, because every
+dispatch consults them** — do not dispatch from memory of what a family is
+"probably" good at.
 
-1. **Family, from the strengths table.** Terminal-native work (scripts, CI,
-   migrations, sysadmin) → Codex. Multi-file changes where the dependency
-   graph matters, or code a human will maintain → Claude. Tied → the provider
-   you've dispatched to less this session.
-2. **Tier, from the lane table.** Mechanical → `haiku` / `gpt-5.6-luna`.
-   Ordinary implementation → `sonnet` / `gpt-5.6-terra`. Codex model ids are
-   generation-qualified; the bare tier name returns a 400.
+**1. Family — from strengths:**
+
+| Work | Family |
+|---|---|
+| Planning, spec-writing, premise rejection | Claude |
+| Multi-file changes where the dependency graph matters | Claude |
+| Large real-repo tasks | Claude |
+| Code a human will read and maintain | Claude |
+| Terminal-native — scripts, sysadmin, CI/CD, migrations | **Codex** |
+| Algorithmic / self-contained problems | **Codex** |
+| High-volume mechanical transforms | **Codex** |
+| Reviewing anything | whichever family did **not** write it |
+
+Tied on the table ⇒ the provider dispatched to less this session (see the
+balance rule in `references/spec-contract.md`; the tiebreak inverts under API
+billing).
+
+**2. Tier and invocation:**
+
+| Weight | Claude | Codex |
+|---|---|---|
+| Mechanical | `haiku` | `codex exec -m gpt-5.6-luna --sandbox workspace-write "$(cat spec.md)" < /dev/null` |
+| Ordinary | `sonnet` | `codex exec -m gpt-5.6-terra --sandbox workspace-write "$(cat spec.md)" < /dev/null` |
+| Review | fresh-context subagent | `codex exec -m gpt-5.6-sol --sandbox read-only "$(cat brief.md)" < /dev/null` |
+
+Codex model ids are generation-qualified — the bare tier name (`terra`)
+returns a 400. `< /dev/null` is mandatory or the stdin probe hangs. Full lane
+table, failure modes, and metering detection: `references/spec-contract.md`.
+
+**If this run dispatches only one family, say why in the report.** A run that
+silently routes everything to the harness's default model has not routed at
+all — that is the failure this step exists to prevent.
 
 State the chosen lane and the axis that decided it, in one line, before
 dispatching. The executor receives the spec file content and NOTHING else —
@@ -88,7 +115,9 @@ should go to different families by the same rule — that is the cheapest
 balancing there is, since it costs nothing in quality.
 
 **Completion criterion:** every slice in the spec has been dispatched to a
-named lane, or explicitly recorded as executed inline — none left implicit.
+named lane — family and tier both stated, with the table row that decided the
+family — or explicitly recorded as executed inline. None left implicit, and no
+slice dispatched without naming its family first.
 
 ## Step 3: Adversarial review (fresh context)
 

@@ -3,9 +3,9 @@
 ## Contents
 - The five-part spec contract
 - Decision-completeness checklist
-- Provider strengths — which family for which work
+- Provider strengths — the evidence behind the table
 - Lane table
-- Balancing the two subscriptions
+- Balancing the two providers
 - Executor dispatch template
 - Reviewer brief template
 
@@ -47,21 +47,29 @@ Run before dispatch; any "no" means the spec isn't ready:
       exist yet. A passive "looks runnable" is how a missing test runner
       reaches the executor.
 
-## Provider strengths — which family for which work
+## Provider strengths — the evidence behind the table
 
-Cost tier answers *how much model*. This answers *which family*. Route on both:
-a cheap lane in the wrong family is a false economy.
+**The operative routing table lives inline in `SKILL.md` Step 2**, because every
+dispatch consults it and a pointer is not reliable enough for a hot path. This
+section is the *why* behind each row — read it when a routing call is contested,
+not on every dispatch. Do not duplicate the table here; it drifts.
 
-| Work | Family | Why |
-|---|---|---|
-| Planning, spec-writing, premise rejection | **Claude** (flagship) | Wins decisively on decision quality and edge-case discovery — the thesis this whole skill rests on |
-| Multi-file changes where the dependency graph matters | **Claude** | The 1M window holds the graph; the practitioner heuristic is "12 files and the dependency graph matters" |
-| Large real-repo tasks | **Claude** | SWE-bench Pro 69.2% vs 58.6% |
-| Code a human will read and maintain | **Claude** | Blind evaluation rated Claude's output cleaner in 67% of comparisons vs 25% (8% ties) |
-| Terminal-native work — scripts, sysadmin, CI/CD, migrations | **Codex** | 77.3% vs 65.4%, a 12-point gap; the largest single divergence between the families |
-| Algorithmic / self-contained problems | **Codex** | Leads LiveCodeBench and Terminal-Bench |
-| High-volume mechanical transforms | **Codex** (`luna`) | ~4× fewer tokens for the same work; speed tier is built for it |
-| Adversarial review of anything | **The family that didn't write it** | Different blind spots is the entire value; a same-family reviewer shares the author's errors |
+- **Planning, spec-writing, premise rejection → Claude.** Wins decisively on
+  decision quality and edge-case discovery; the thesis this whole skill rests on.
+- **Multi-file / dependency-graph work → Claude.** The 1M window holds the
+  graph. The practitioner heuristic is "12 files and the dependency graph
+  matters."
+- **Large real-repo tasks → Claude.** SWE-bench Pro 69.2% vs 58.6%.
+- **Code a human will maintain → Claude.** Blind evaluation rated Claude's
+  output cleaner in 67% of comparisons vs 25%, 8% ties.
+- **Terminal-native work → Codex.** 77.3% vs 65.4% — a 12-point gap, the
+  largest single divergence between the families.
+- **Algorithmic / self-contained problems → Codex.** Leads LiveCodeBench and
+  Terminal-Bench.
+- **High-volume mechanical transforms → Codex `luna`.** ~4× fewer tokens for
+  the same work.
+- **Review → the family that didn't write it.** Different blind spots is the
+  entire value; a same-family reviewer shares the author's errors.
 
 The industry hybrid this converges on — *Claude generates, Codex reviews* — is
 the default here too. Invert it when the work is terminal-native: Codex builds
