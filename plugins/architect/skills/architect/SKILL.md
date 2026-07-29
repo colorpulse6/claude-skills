@@ -28,9 +28,12 @@ family answers *which model*. The families diverge sharply by task type —
 Claude leads on long-context multi-file work and code quality, Codex leads on
 terminal-native work by a 12-point margin — so a cheap lane in the wrong family
 is a false economy. What the second lane *costs* depends on how each provider
-is billed, which varies by installation; `references/spec-contract.md` holds
-the strengths table and the balance rule, including how to tell which regime
-you're in.
+is billed, which varies by installation.
+
+**The routing tables are inline in Step 2** — that is the single source of
+truth for which family and which tier. `references/spec-contract.md` holds the
+evidence behind each row, the metering-detection table, and the balance rule;
+reach for it when a routing call is contested, not to make a routine one.
 
 Four rules that make it work, the first three inherited from systems that ran
 this at scale:
@@ -91,9 +94,13 @@ billing).
 
 | Weight | Claude | Codex |
 |---|---|---|
-| Mechanical | `haiku` | `codex exec -m gpt-5.6-luna --sandbox workspace-write "$(cat spec.md)" < /dev/null` |
-| Ordinary | `sonnet` | `codex exec -m gpt-5.6-terra --sandbox workspace-write "$(cat spec.md)" < /dev/null` |
-| Review | fresh-context subagent | `codex exec -m gpt-5.6-sol --sandbox read-only "$(cat brief.md)" < /dev/null` |
+| Mechanical | `haiku` | `codex exec -m gpt-5.6-luna --sandbox workspace-write "$(cat .architect/spec-<slug>.md)" < /dev/null` |
+| Ordinary | `sonnet` | `codex exec -m gpt-5.6-terra --sandbox workspace-write "$(cat .architect/spec-<slug>.md)" < /dev/null` |
+| Review | fresh-context subagent | `codex exec -m gpt-5.6-sol --sandbox read-only "$(cat .architect/review-<slice>.md)" < /dev/null` |
+
+`<slug>` is the spec you wrote in Step 1; `<slice>` is the reviewer brief you
+write in Step 3. These are the canonical paths this skill creates — substitute
+the real names, and do not invent a bare `spec.md`, which nothing produces.
 
 Codex model ids are generation-qualified — the bare tier name (`terra`)
 returns a 400. `< /dev/null` is mandatory or the stdin probe hangs. Full lane
